@@ -49,5 +49,4 @@ private:
 	std::atomic_bool m_stop_requested{false};
 };
 
-
 #endif
