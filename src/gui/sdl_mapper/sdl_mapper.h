@@ -33,8 +33,34 @@ class CMapper {
 private:
     void SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
                          [[maybe_unused]] const Rgb888 &color);
+    void CreateStringBind(char * line);
+    void ClearAllBinds();
+    void CreateDefaultBinds();
+    void AddHandler(MAPPER_Handler *handler, SDL_Scancode key,
+                    uint32_t mods, const char *event_name, const char *button_name);
+    void SaveBinds() const;
+    bool LoadBindsFromFile(const std::string_view mapperfile_path,
+                           const std::string_view mapperfile_name);
 
-    void TriggerEvent(const CEvent *event, const bool deactivation_state);
+    void CheckEvent(SDL_Event *event);
+    void QueryJoysticks();
+    void CreateBindGroups();
+    bool IsUsingJoysticks() const;
+    void LosingFocus();
+    void RunEvent(uint32_t);
+    void Run(bool const pressed);
+    void Destroy(Section *sec);
+    void BindKeys(Section *sec);
+    std::vector<std::string> CMapper::GetEventNames(const std::string &prefix);
+    void AutoType(std::vector<std::string> &sequence,
+                     const uint32_t wait_ms,
+                     const uint32_t pace_ms);
+    void AutoTypeStopImmediately();
+    void Startup(Section* sec);
+
+#if defined (REDUCE_JOYSTICK_POLLING)
+    void MAPPER_UpdateJoysticks();
+#endif
 
     std::list<CStickBindGroup *> stickbindgroups;
 	SDL_Window *window = nullptr;
@@ -52,8 +78,20 @@ private:
 		unsigned int num = 0;
 		unsigned int num_groups = 0;
 	} sticks = {};
+
 	Typer typist = {};
 	std::string filename = "";
+
+    bool autofire{false};
+
+    std::array<VirtJoystick, 2> virtual_joysticks;
+    std::vector<std::unique_ptr<CEvent>> events;
+    std::vector<std::unique_ptr<CButton>> buttons;
+    std::vector<CBindGroup *> bindgroups;
+    std::list<CKeyBindGroup *> keybindgroups;
+    std::vector<CHandlerEvent *> handlergroup;
+    CBindList holdlist;
+    std::list<CBind *> all_binds;
 } mapper;
 
 

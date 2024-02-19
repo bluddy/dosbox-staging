@@ -58,7 +58,6 @@ protected:
 	CBindList *lists = nullptr;
 	Bitu keys = 0;
 };
-static std::list<CKeyBindGroup *> keybindgroups;
 
 class CStickBindGroup : public CBindGroup {
 public:
