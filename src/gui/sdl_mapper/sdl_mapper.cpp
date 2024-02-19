@@ -37,7 +37,7 @@
 #include <SDL.h>
 #include <SDL_thread.h>
 
-#include "cmapper.h"
+#include "sdl_mapper.h"
 #include "control.h"
 #include "joystick.h"
 #include "keyboard.h"
@@ -50,6 +50,10 @@
 #include "string_utils.h"
 #include "timer.h"
 #include "video.h"
+#include "default_bindings.h"
+
+extern SDL_Window* GFX_GetWindow();
+extern void GFX_UpdateDisplayDimensions(int width, int height);
 
 //  Status Colors
 //  ~~~~~~~~~~~~~
@@ -84,24 +88,9 @@ enum BC_Types {
 #define BFLG_Hold 0x0001
 #define BFLG_Repeat 0x0004
 
-
-#define MAXSTICKS 8
-#define MAXACTIVE 16
-// Use 36 for Android (KEYCODE_BUTTON_1..16 are mapped to SDL buttons 20..35)
-#define MAXBUTTON 36
-#define MAXBUTTON_CAP 16
-#define MAXAXIS       10
-#define MAXHAT        2
-
-class CEvent;
-class CHandlerEvent;
-class CButton;
-class CBind;
-class CBindGroup;
-
 extern uint8_t int10_font_14[256 * 14];
 
-void CMapper::SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
+void Mapper::SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
 						[[maybe_unused]] const Rgb888 &color)
 {
 	// Basic joystick LED support was added in SDL 2.0.14
@@ -114,19 +103,10 @@ void CMapper::SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
 	// apply the color
 	SDL_JoystickSetLED(joystick, color.red, color.green, color.blue);
 #endif
-})
+}
 
-
-
-extern SDL_Window* GFX_GetWindow();
-extern void GFX_UpdateDisplayDimensions(int width, int height);
-
-
-static CKeyEvent * caps_lock_event=nullptr;
-static CKeyEvent * num_lock_event=nullptr;
-
-
-void CMapper::CreateStringBind(char * line) {
+void Mapper::CreateStringBind(char * line)
+{
 	line=trim(line);
 	char * eventname=strip_word(line);
 	CEvent * event = nullptr;
@@ -152,17 +132,16 @@ foundevent:
 	}
 }
 
-
-void CMapper::ClearAllBinds() {
+void Mapper::ClearAllBinds() {
 	// wait for the auto-typer to complete because it might be accessing events
-	mapper.typist.Wait();
+	typist.Wait();
 
 	for (const auto& event : events) {
 		event->ClearBinds();
 	}
 }
 
-void CMapper::CreateDefaultBinds() {
+void Mapper::CreateDefaultBinds() {
 	ClearAllBinds();
 	char buffer[512];
 	Bitu i=0;
@@ -224,24 +203,25 @@ void CMapper::CreateDefaultBinds() {
 	LOG_MSG("MAPPER: Loaded default key bindings");
 }
 
-void CMapper::AddHandler(MAPPER_Handler *handler, SDL_Scancode key,
+void Mapper::AddHandler(MAPPER_Handler *handler, SDL_Scancode key,
                        uint32_t mods, const char *event_name,
                        const char *button_name)
 {
-	//Check if it already exists=> if so return.
-	for (const auto &handler_event : handlergroup) {
-		if (handler_event->button_name == button_name)
-			return;
-	}
+	const bool already_exists{
+		std::find(handlergroup.begin(), handlergroup.end(),
+			[&](const auto& handler_event)
+				{ handler_event->button_name == button_name) }};
 
-	char tempname[17];
-	safe_strcpy(tempname, "hand_");
-	safe_strcat(tempname, event_name);
-	new CHandlerEvent(tempname, handler, key, mods, button_name);
-	return;
+	if (!already_exists) {
+		char tempname[17];
+		safe_strcpy(tempname, "hand_");
+		safe_strcat(tempname, event_name);
+		handlergroup.push_back(
+			std::make_unique<CHandlerEvent>(tempname, handler, key, mods, button_name)));
+	}
 }
 
-void CMapper::SaveBinds() {
+void Mapper::SaveBinds() {
 	const char *filename = mapper.filename.c_str();
 	FILE * savefile=fopen(filename,"wt+");
 	if (!savefile) {
@@ -264,7 +244,7 @@ void CMapper::SaveBinds() {
 	LOG_MSG("MAPPER: Wrote key bindings to %s", filename);
 }
 
-bool CMapper::LoadBindsFromFile(const std::string_view mapperfile_path,
+bool Mapper::LoadBindsFromFile(const std::string_view mapperfile_path,
                                  const std::string_view mapperfile_name)
 {
 	// If the filename is empty the user wants defaults
@@ -302,7 +282,7 @@ bool CMapper::LoadBindsFromFile(const std::string_view mapperfile_path,
 	return was_loaded;
 }
 
-void CMapper::CheckEvent(SDL_Event *event)
+void Mapper::CheckEvent(SDL_Event *event)
 {
 	for (auto &group : bindgroups)
 		if (group->CheckEvent(event))
@@ -318,7 +298,7 @@ void CMapper::CheckEvent(SDL_Event *event)
 
 // 7-21-2023: No longer resetting mapper.sticks.num_groups due to
 // https://github.com/dosbox-staging/dosbox-staging/issues/2687
-void CMapper::QueryJoysticks()
+void Mapper::QueryJoysticks()
 {
 	// Reset our joystick status
 	mapper.sticks.num = 0;
@@ -397,7 +377,7 @@ void CMapper::QueryJoysticks()
 	}
 }
 
-void CMapper::CreateBindGroups() {
+void Mapper::CreateBindGroups() {
 	bindgroups.clear();
 	CKeyBindGroup* key_bind_group = new CKeyBindGroup(SDL_NUM_SCANCODES);
 	keybindgroups.push_back(key_bind_group);
@@ -472,7 +452,7 @@ void CMapper::CreateBindGroups() {
 	}
 }
 
-bool CMapper::IsUsingJoysticks() const
+bool Mapper::IsUsingJoysticks() const
 {
 	return (sticks.num > 0);
 }
@@ -536,7 +516,7 @@ void Mapper::Destroy(Section *sec) {
 	stickbindgroups.clear();
 
 	// Free any allocated sticks
-	for (int i = 0; i < MAXSTICKS; ++i) {
+	for (int i = 0; i < max_sticks; ++i) {
 		delete mapper.sticks.stick[i];
 		mapper.sticks.stick[i] = nullptr;
 	}
@@ -550,7 +530,7 @@ void Mapper::Destroy(Section *sec) {
 	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
 
-void CMapper::BindKeys(Section *sec)
+void Mapper::BindKeys(Section *sec)
 {
 	// Release any keys pressed, or else they'll get stuck
 	GFX_LosingFocus();
@@ -588,7 +568,7 @@ void CMapper::BindKeys(Section *sec)
 	GFX_RegenerateWindow(sec);
 }
 
-std::vector<std::string> CMapper::GetEventNames(const std::string &prefix) {
+std::vector<std::string> Mapper::GetEventNames(const std::string &prefix) {
 	std::vector<std::string> key_names;
 	key_names.reserve(events.size());
 	for (auto & e : events) {
@@ -602,18 +582,18 @@ std::vector<std::string> CMapper::GetEventNames(const std::string &prefix) {
 	return key_names;
 }
 
-void CMapper::AutoType(std::vector<std::string> &sequence,
+void Mapper::AutoType(std::vector<std::string> &sequence,
                      const uint32_t wait_ms,
                      const uint32_t pace_ms) {
 	mapper.typist.Start(&events, sequence, wait_ms, pace_ms);
 }
 
-void CMapper::AutoTypeStopImmediately()
+void Mapper::AutoTypeStopImmediately()
 {
 	mapper.typist.StopImmediately();
 }
 
-void CMapper::StartUp(Section* sec)
+void Mapper::StartUp(Section* sec)
 {
 	assert(sec);
 	Section_prop* section = static_cast<Section_prop*>(sec);

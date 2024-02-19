@@ -24,20 +24,20 @@
 
 #include <vector>
 #include <array>
-#include <sdl2>
+#include <SDL.h>
 
 class CEvent;
 class CBind;
 
-class CMapper {
+class Mapper {
     // Singleton pattern
-    static CMapper& get() {
-        static CMapper instance;
+    static Mapper& get() {
+        static Mapper instance;
         return instance;
     }
 
 private:
-    CMapper() {} // Private constructor for singleton
+    Mapper() {} // Private constructor for singleton
     void SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
                          [[maybe_unused]] const Rgb888 &color);
     void CreateStringBind(char * line);
@@ -58,7 +58,7 @@ private:
     void Run(bool const pressed);
     void Destroy(Section *sec);
     void BindKeys(Section *sec);
-    std::vector<std::string> CMapper::GetEventNames(const std::string &prefix);
+    std::vector<std::string> Mapper::GetEventNames(const std::string &prefix);
     void AutoType(std::vector<std::string> &sequence,
                      const uint32_t wait_ms,
                      const uint32_t pace_ms);
@@ -68,6 +68,14 @@ private:
 #if defined (REDUCE_JOYSTICK_POLLING)
     void MAPPER_UpdateJoysticks();
 #endif
+
+    static constexpr int max_sticks{8};
+    static constexpr int max_active{16};
+    // Use 36 for Android (KEYCODE_BUTTON_1..16 are mapped to SDL buttons 20..35)
+    static constexpr int max_button{36};
+    static constexpr int max_button_cap{16};
+    static constexpr int max_axis{10};
+    static constexpr int max_hat{2};
 
     std::list<CStickBindGroup *> stickbindgroups;
 	SDL_Window *window = nullptr;
@@ -95,13 +103,14 @@ private:
 
     std::array<VirtJoystick, 2> virtual_joysticks;
     std::vector<std::unique_ptr<CEvent>> events;
-    std::vector<std::unique_ptr<CButton>> buttons;
-    std::vector<CBindGroup *> bindgroups;
-    std::list<CKeyBindGroup *> keybindgroups;
-    std::vector<CHandlerEvent *> handlergroup;
+    std::vector<std::unique_ptr<CBindGroup>> bindgroups;
+    std::list<std::unique_ptr<CKeyBindGroup>> keybindgroups;
+    std::vector<std::unique_ptr<CHandlerEvent>> handlergroup;
     CBindList holdlist;
-    std::list<CBind *> all_binds;
-} mapper;
+    std::list<std::unique_ptr<CBind>> all_binds;
+    CKeyEvent * caps_lock_event=nullptr;
+    CKeyEvent * num_lock_event=nullptr;
+};
 
 
 #endif
