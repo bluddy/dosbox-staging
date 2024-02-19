@@ -625,5 +625,7 @@ void CMapper::StartUp(Section* sec)
 
 	// Runs one-time on shutdown
 	section->AddDestroyFunction(&MAPPER_Destroy);
+
+	// Set up the ctrl-F1 shortcut for the mapper itself
 	MAPPER_AddHandler(&MAPPER_Run, SDL_SCANCODE_F1, PRIMARY_MOD, "mapper", "Mapper");
 }

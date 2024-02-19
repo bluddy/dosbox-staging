@@ -22,15 +22,22 @@
 #ifndef DOSBOX_SDL_MAPPER_H
 #define DOSBOX_SDL_MAPPER_H
 
-#include <sdl>
+#include <vector>
+#include <array>
+#include <sdl2>
 
 class CEvent;
 class CBind;
 
 class CMapper {
-    CMapper();
+    // Singleton pattern
+    static CMapper& get() {
+        static CMapper instance;
+        return instance;
+    }
 
 private:
+    CMapper() {} // Private constructor for singleton
     void SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
                          [[maybe_unused]] const Rgb888 &color);
     void CreateStringBind(char * line);
@@ -73,6 +80,8 @@ private:
 	bool redraw = false;
 	bool addbind = false;
 	Bitu mods = 0;
+
+    // Detected info about joysticks
 	struct {
 		CStickBindGroup *stick[MAXSTICKS] = {nullptr};
 		unsigned int num = 0;
