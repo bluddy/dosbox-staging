@@ -37,6 +37,7 @@
 #include <SDL.h>
 #include <SDL_thread.h>
 
+#include "cmapper.h"
 #include "control.h"
 #include "joystick.h"
 #include "keyboard.h"
@@ -123,8 +124,8 @@ static struct {
 
 bool autofire = false;
 
-static void set_joystick_led([[maybe_unused]] SDL_Joystick *joystick,
-                             [[maybe_unused]] const Rgb888 &color)
+void CMapper::SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
+						[[maybe_unused]] const Rgb888 &color)
 {
 	// Basic joystick LED support was added in SDL 2.0.14
 #if SDL_VERSION_ATLEAST(2, 0, 14)
@@ -136,52 +137,7 @@ static void set_joystick_led([[maybe_unused]] SDL_Joystick *joystick,
 	// apply the color
 	SDL_JoystickSetLED(joystick, color.red, color.green, color.blue);
 #endif
-}
-
-std::list<CStickBindGroup *> stickbindgroups;
-
-void MAPPER_TriggerEvent(const CEvent *event, const bool deactivation_state) {
-	assert(event);
-	for (auto &bind : event->bindlist) {
-		bind->ActivateBind(32767, true, false);
-		bind->DeActivateBind(deactivation_state);
-	}
-}
-
-static void DrawText(int32_t x, int32_t y, const char* text, const Rgb888& color)
-{
-	SDL_Rect character_rect = {0, 0, 8, 14};
-	SDL_Rect dest_rect      = {x, y, 8, 14};
-	SDL_SetTextureColorMod(mapper.font_atlas, color.red, color.green, color.blue);
-	while (*text) {
-		character_rect.y = *text * character_rect.h;
-		SDL_RenderCopy(mapper.renderer,
-		               mapper.font_atlas,
-		               &character_rect,
-		               &dest_rect);
-		text++;
-		dest_rect.x += character_rect.w;
-	}
-}
-
-static struct {
-	CCaptionButton *  event_title;
-	CCaptionButton *  bind_title;
-	CCaptionButton *  selected;
-	CCaptionButton *  action;
-	CBindButton * save;
-	CBindButton *exit;
-	CBindButton * add;
-	CBindButton * del;
-	CBindButton * next;
-	CCheckButton * mod1,* mod2,* mod3,* hold;
-} bind_but;
-
-static void change_action_text(const char* text, const Rgb888& col)
-{
-	bind_but.action->Change(text,"");
-	bind_but.action->SetColor(col);
-}
+})
 
 static std::string humanize_key_name(const CBindList &binds, const std::string &fallback)
 {

@@ -22,7 +22,21 @@
 #ifndef DOSBOX_SDL_MAPPER_H
 #define DOSBOX_SDL_MAPPER_H
 
-static struct CMapper {
+#include <sdl>
+
+class CEvent;
+class CBind;
+
+class CMapper {
+    CMapper();
+
+private:
+    void SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
+                         [[maybe_unused]] const Rgb888 &color);
+
+    void TriggerEvent(const CEvent *event, const bool deactivation_state);
+
+    std::list<CStickBindGroup *> stickbindgroups;
 	SDL_Window *window = nullptr;
 	SDL_Renderer* renderer  = nullptr;
 	SDL_Texture* font_atlas = nullptr;

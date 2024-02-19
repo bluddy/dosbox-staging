@@ -16,7 +16,14 @@ void CEvent::ClearBinds() {
 }
 
 void CEvent::DeActivateAll() {
-	for (CBindList_it bit = bindlist.begin() ; bit != bindlist.end(); ++bit) {
-		(*bit)->DeActivateBind(true);
+	for (auto &bind : bindlist) {
+		bind->DeActivateBind(true);
+	}
+}
+
+void CEvent::Trigger(bool const deactivation_state) {
+	for (auto &bind : bindlist) {
+		bind->ActivateBind(32767, true, false);
+		bind->DeActivateBind(deactivation_state);
 	}
 }

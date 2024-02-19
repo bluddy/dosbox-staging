@@ -11,6 +11,7 @@ public:
 
 	virtual ~CEvent() = default;
 
+    void Trigger(bool const deactivation_state);
 	void AddBind(CBind * bind);
 	void ClearBinds();
 	virtual void Active(bool yesno)=0;
@@ -27,8 +28,8 @@ public:
 		 return entry;
 	}
 	virtual bool IsTrigger() = 0;
-	CBindList bindlist;
 protected:
+	CBindList bindlist;
 	Bitu activity = 0;
 	char entry[16] = {0};
 	Bits current_value = 0;
