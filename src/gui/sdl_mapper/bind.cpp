@@ -1,19 +1,34 @@
+#include <iostream>
+#include <sstream>
+
 #include "bind.h"
+#include "mapper.h"
 
-CBind::CBind(CBindList *binds)
-    : list(binds)
-{
-    list->push_back(this);
-    event=nullptr;
-    all_binds.push_back(this);
-}
+CBind::CBind() {}
+
+constexpr uint32_t BMOD_Mod1{MMOD1};
+constexpr uint32_t BMOD_Mod2{MMOD2};
+constexpr uint32_t BMOD_Mod3{MMOD3};
+
+constexpr uint32_t BFLG_Hold{0x0001};
+constexpr uint32_t BFLG_Repeat{0x0004};
+
 	
-
-void CBind::AddFlags(char * buf) {
-    if (mods & BMOD_Mod1) strcat(buf," mod1");
-    if (mods & BMOD_Mod2) strcat(buf," mod2");
-    if (mods & BMOD_Mod3) strcat(buf," mod3");
-    if (flags & BFLG_Hold) strcat(buf," hold");
+std::string CBind::GetFlagsStr() const {
+    std::ostringstream oss;
+    if (mods & BMOD_Mod1) {
+        oss << " mod1";
+    }
+    if (mods & BMOD_Mod2) {
+        oss << " mod2";
+    }
+    if (mods & BMOD_Mod3) {
+        oss << " mod3";
+    }
+    if (flags & BFLG_Hold) {
+        oss << " hold";
+    }
+    return oss.str();
 }
 
 void CBind::SetFlags(char *buf)
@@ -125,19 +140,28 @@ CJHatBind::CJHatBind(CBindList *_list, CBindGroup *_group, uint8_t _hat, uint8_t
         E_Exit("MAPPER:JOYSTICK:Invalid hat position");
 }
 
-void CJHatBind::ConfigName(char *buf)
+std::string CJHatBind::GetConfigName() const
 {
-    sprintf(buf,"%s hat %" PRIu8 " %" PRIu8,
-            group->ConfigStart(), hat, dir);
+    std::ostringstream oss;
+    oss << group->ConfigStart() << " hat " << hat << " " << dir;
+    return oss.str();
 }
 
 std::string CJHatBind::GetBindName() const
 {
-    char buf[30];
-    safe_sprintf(buf, "%s Hat %" PRIu8 " %s", group->BindStart(), hat,
-                    ((dir == SDL_HAT_UP)      ? "up"
-                    : (dir == SDL_HAT_RIGHT) ? "right"
-                    : (dir == SDL_HAT_DOWN)  ? "down"
-                                            : "left"));
-    return buf;
+    std::ostringstream oss;
+    std::string dir_s{""};
+
+    switch (dir) {
+    case SDL_HAT_UP:
+        dir_s = "up";
+    case SDL_HAT_RIGHT:
+        dir_s = "right";
+    case SDL_HAT_LEFT:
+        dir_s = "left";
+    case SDL_HAT_DOWN:
+        dir_s = "down";
+    };
+    oss << group->BindStart() << " Hat " << hat << " " << dir;
+    return oss.str();
 }

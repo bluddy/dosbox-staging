@@ -4,39 +4,40 @@
 #include <list>
 #include <vector>
 #include <string>
+#include <memory>
 
-typedef std::list<CBind *> CBindList;
-typedef std::list<CBind *>::iterator CBindList_it;
-typedef std::vector<CBindGroup *>::iterator CBindGroup_it;
+#include "SDL.h"
+#include "types.h"
+
+typedef std::list<std::shared_ptr<CBind>> CBindList;
+
+class CEvent;
 
 class CBind {
 public:
-	CBind(CBindList *binds);
+	CBind() {}
 
-	virtual ~CBind()
-	{
-		if (list)
-			list->remove(this);
-	}
+	virtual ~CBind() {}
 
 	CBind(const CBind&) = delete; // prevent copy
 	CBind& operator=(const CBind&) = delete; // prevent assignment
 
-	void AddFlags(char * buf);
+	std::string GetFlagsStr() const;
 	void SetFlags(char *buf);
 
-	void ActivateBind(Bits _value,bool ev_trigger,bool skip_action=false);			/* use value-boundary for on/off events */
+    // use value-boundary for on/off events
+	void ActivateBind(Bits _value, bool ev_trigger, bool skip_action=false);
 	void DeActivateBind(bool ev_trigger);
-	virtual void ConfigName(char * buf) = 0;
-
+	virtual std::string GetConfigName() const = 0;
 	virtual std::string GetBindName() const = 0;
 
-	Bitu mods = 0;
-	Bitu flags = 0;
-	CEvent *event = nullptr;
-	CBindList *list = nullptr;
-	bool active = false;
-	bool holding = false;
+	Bitu mods{0};
+	Bitu flags{0};
+
+    // Event we belong to
+	CEvent *event{nullptr};
+	bool active{false};
+	bool holding{false};
 };
 
 
@@ -49,9 +50,11 @@ public:
 
 	std::string GetBindName() const override;
 
-	void ConfigName(char *buf) override
+	std::string ConfigName() const override
 	{
-		sprintf(buf, "key %d", key);
+        std::ostringstream oss;
+        oss << "key " << key;
+        return oss.str();
 	}
 
 public:
