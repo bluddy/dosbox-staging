@@ -31,19 +31,25 @@ std::string CBind::GetFlagsStr() const {
     return oss.str();
 }
 
-void CBind::SetFlags(char *buf)
+void CBind::SetFlagsFromStr(std::string flag_s)
 {
-    char *word;
-    while (*(word = strip_word(buf))) {
-        if (!strcasecmp(word, "mod1"))
+    std::string word;
+    do {
+        word = strip_word(flag_s);
+        lowcase(word);
+        if (word == "mod1") {
             mods |= BMOD_Mod1;
-        if (!strcasecmp(word, "mod2"))
+        }
+        if (word == "mod2") {
             mods |= BMOD_Mod2;
-        if (!strcasecmp(word, "mod3"))
+        }
+        if (word == "mod3") {
             mods |= BMOD_Mod3;
-        if (!strcasecmp(word, "hold"))
+        }
+        if (word == "hold") {
             flags |= BFLG_Hold;
-    }
+        }
+    } while (word != "");
 }
 
 void CBind::ActivateBind(Bits _value,bool ev_trigger,bool skip_action=false) {
