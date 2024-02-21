@@ -72,21 +72,19 @@ constexpr Rgb888 color_red(255, 0, 0);
 constexpr Rgb888 color_green(0, 255, 0);
 
 enum BB_Types {
-	BB_Next,BB_Add,BB_Del,
-	BB_Save,BB_Exit
+	BB_Next,
+	BB_Add,
+	BB_Del,
+	BB_Save,
+	BB_Exit
 };
 
 enum BC_Types {
-	BC_Mod1,BC_Mod2,BC_Mod3,
+	BC_Mod1,
+	BC_Mod2,
+    BC_Mod3,
 	BC_Hold
 };
-
-#define BMOD_Mod1 MMOD1
-#define BMOD_Mod2 MMOD2
-#define BMOD_Mod3 MMOD3
-
-#define BFLG_Hold 0x0001
-#define BFLG_Repeat 0x0004
 
 extern uint8_t int10_font_14[256 * 14];
 
@@ -222,9 +220,10 @@ void Mapper::AddHandler(MAPPER_Handler *handler, SDL_Scancode key,
 }
 
 void Mapper::SaveBinds() {
-	const char *filename = mapper.filename.c_str();
 	FILE * savefile=fopen(filename,"wt+");
-	if (!savefile) {
+	std::ofsteam savefile(filename)
+
+	if (!savefile.is_open()) {
 		LOG_MSG("MAPPER: Can't open %s for saving the key bindings", filename);
 		return;
 	}

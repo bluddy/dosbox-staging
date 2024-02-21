@@ -160,8 +160,7 @@ public:
 		case BB_Add:
 			mapper.addbind=true;
 			SetActiveBind(nullptr);
-			change_action_text("Press a key/joystick button or move the joystick.",
-			                   color_red);
+			change_action_text("Press a key/joystick button or move the joystick.", color_red);
 			break;
 		case BB_Del:
 			if (mapper.abindit != mapper.aevent->bindlist.end()) {

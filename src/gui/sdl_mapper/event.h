@@ -1,64 +1,55 @@
 #ifndef DOSBOX_SDL_MAPPER_EVENT
 #define DOSBOX_SDL_MAPPER_EVENT
 
+#include <string>
+#include <memory>
+#include <list>
+
+#include "types.h"
+
+class CBind;
+typedef std::list<std::shared_ptr<CBind>> CBindList;
+
 class CEvent {
 public:
-	CEvent(const char *ev_entry) : bindlist{}
-	{
-		safe_strcpy(entry, ev_entry);
-		events.emplace_back(this);
-	}
+	CEvent(std::string _entry) : entry(_entry) {}
 
 	virtual ~CEvent() = default;
 
     void Trigger(bool const deactivation_state);
-	void AddBind(CBind * bind);
+	void AddBind(std::shared_ptr<CBind> bind);
 	void ClearBinds();
-	virtual void Active(bool yesno)=0;
-	virtual void ActivateEvent(bool ev_trigger,bool skip_action)=0;
-	virtual void DeActivateEvent(bool ev_trigger)=0;
+	virtual void SetActive(bool yesno) = 0;
+	virtual void ActivateEvent(bool ev_trigger, bool skip_action) = 0;
+	virtual void DeActivateEvent(bool ev_trigger) = 0;
 	void DeActivateAll();
-	void SetValue(Bits value){
-		current_value=value;
+	void SetValue(Bits value) {
+		current_value = value;
 	}
-	Bits GetValue() {
+	Bits GetValue() const {
 		return current_value;
 	}
-	const char * GetName(void) const {
-		 return entry;
+	std::string GetName() const {
+		return entry;
 	}
 	virtual bool IsTrigger() = 0;
+
 protected:
-	CBindList bindlist;
+	CBindList bind_list;
 	Bitu activity = 0;
-	char entry[16] = {0};
+	std::string entry;
 	Bits current_value = 0;
 };
 
-/* class for events which can be ON/OFF only: key presses, joystick buttons, joystick hat */
+/* Class for events which can be ON/OFF only: key presses, joystick buttons, joystick hat */
 class CTriggeredEvent : public CEvent {
 public:
-	CTriggeredEvent(const char* const _entry) : CEvent(_entry) {}
-	bool IsTrigger() override {
+	CTriggeredEvent(std::string const _entry) : CEvent(_entry) {}
+	bool IsTrigger() const {
 		return true;
 	}
-	void ActivateEvent(bool ev_trigger,bool skip_action) override {
-		if (current_value>25000) {
-			/* value exceeds boundary, trigger event if not active */
-			if (!activity && !skip_action) Active(true);
-			if (activity<32767) activity++;
-		} else {
-			if (activity>0) {
-				/* untrigger event if it is fully inactive */
-				DeActivateEvent(ev_trigger);
-				activity=0;
-			}
-		}
-	}
-	void DeActivateEvent(bool /*ev_trigger*/) override {
-		activity--;
-		if (!activity) Active(false);
-	}
+	void ActivateEvent(bool ev_trigger, bool skip_action) override;
+	void DeActivateEvent(bool /*ev_trigger*/) override;
 };
 
 /* class for events which have a non-boolean state: joystick axis movement */
@@ -71,11 +62,11 @@ public:
 	void ActivateEvent(bool ev_trigger,bool skip_action) override {
 		if (ev_trigger) {
 			activity++;
-			if (!skip_action) Active(true);
+			if (!skip_action) SetActive(true);
 		} else {
 			/* test if no trigger-activity is present, this cares especially
 			   about activity of the opposite-direction joystick axis for example */
-			if (!GetActivityCount()) Active(true);
+			if (!GetActivityCount()) SetActive(true);
 		}
 	}
 	void DeActivateEvent(const bool ev_trigger) override
@@ -84,7 +75,7 @@ public:
 			// Zero-out this event's pending activity if triggered
 			// or we have no opposite-direction events
 			activity = 0;
-			Active(false);
+			SetActive(false);
 		}
 	}
 
@@ -101,8 +92,8 @@ public:
 	          key(k)
 	{}
 
-	void Active(bool yesno) override {
-		KEYBOARD_AddKey(key,yesno);
+	void SetActive(bool yesno) override {
+		KEYBOARD_AddKey(key, yesno);
 	}
 
 	KBD_KEYS key;
@@ -117,7 +108,7 @@ public:
 	          button_id(id)
 	{}
 
-	void Active(const bool pressed) override
+	void SetActive(const bool pressed) override
 	{
 		MOUSE_EventButton(button_id, pressed);
 	}
@@ -143,7 +134,7 @@ public:
 	CJAxisEvent(const CJAxisEvent&) = delete; // prevent copy
 	CJAxisEvent& operator=(const CJAxisEvent&) = delete; // prevent assignment
 
-	void Active(bool /*moved*/) override {
+	void SetActive(bool /*moved*/) override {
 		virtual_joysticks[stick].axis_pos[axis]=(int16_t)(GetValue()*(positive?1:-1));
 	}
 	Bitu GetActivityCount() override {
@@ -151,7 +142,7 @@ public:
 	}
 	void RepostActivity() override {
 		/* caring for joystick movement into the opposite direction */
-		opposite_axis->Active(true);
+		opposite_axis->SetActive(true);
 	}
 protected:
 	void SetOppositeAxis(CJAxisEvent * _opposite_axis) {
@@ -170,7 +161,7 @@ public:
 	          button(btn)
 	{}
 
-	void Active(bool pressed) override
+	void SetActive(bool pressed) override
 	{
 		virtual_joysticks[stick].button_pressed[button]=pressed;
 	}
@@ -188,7 +179,7 @@ public:
 	          dir(d)
 	{}
 
-	void Active(bool pressed) override
+	void SetActive(bool pressed) override
 	{
 		virtual_joysticks[stick].hat_pressed[(hat<<2)+dir]=pressed;
 	}
@@ -204,7 +195,7 @@ public:
 	          wmod(_wmod)
 	{}
 
-	void Active(bool yesno) override
+	void SetActive(bool yesno) override
 	{
 		if (yesno)
 			mapper.mods |= (static_cast<Bitu>(1) << (wmod-1));
@@ -236,7 +227,7 @@ public:
 	CHandlerEvent(const CHandlerEvent&) = delete; // prevent copy
 	CHandlerEvent& operator=(const CHandlerEvent&) = delete; // prevent assignment
 
-	void Active(bool yesno) override { (*handler)(yesno); }
+	void SetActive(bool yesno) override { (*handler)(yesno); }
 
 	void MakeDefaultBind(char *buf)
 	{

@@ -1,8 +1,8 @@
 #include "event.h"
 
 
-void CEvent::AddBind(CBind * bind) {
-	bindlist.push_front(bind);
+void CEvent::AddBind(std::shared_ptr<CBind> bind) {
+	bind_list.push_front(bind);
 	bind->event=this;
 }
 
@@ -26,4 +26,23 @@ void CEvent::Trigger(bool const deactivation_state) {
 		bind->ActivateBind(32767, true, false);
 		bind->DeActivateBind(deactivation_state);
 	}
+}
+
+void CTriggeredEvent::ActivateEvent(bool ev_trigger, bool skip_action) {
+    if (current_value > 25000) {
+        /* value exceeds boundary, trigger event if not active */
+        if (!activity && !skip_action) Active(true);
+        if (activity<32767) activity++;
+    } else {
+        if (activity>0) {
+            /* untrigger event if it is fully inactive */
+            DeActivateEvent(ev_trigger);
+            activity=0;
+        }
+    }
+}
+
+void CTriggeredEvent::DeActivateEvent(bool /*ev_trigger*/) {
+    activity--;
+    if (!activity) Active(false);
 }
