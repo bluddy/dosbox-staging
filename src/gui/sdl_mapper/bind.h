@@ -23,7 +23,7 @@ public:
 	CBind& operator=(const CBind&) = delete; // prevent assignment
 
 	std::string GetFlagsStr() const;
-	void SetFlags(char *buf);
+	void SetFlagsFromStr(std::string flag_s);
 
     // use value-boundary for on/off events
 	void ActivateBind(Bits _value, bool ev_trigger, bool skip_action=false);
