@@ -44,5 +44,7 @@ void CTriggeredEvent::ActivateEvent(bool ev_trigger, bool skip_action) {
 
 void CTriggeredEvent::DeActivateEvent(bool /*ev_trigger*/) {
     activity--;
-    if (!activity) Active(false);
+    if (!activity) {
+        Active(false);
+    }
 }
