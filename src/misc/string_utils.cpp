@@ -105,6 +105,13 @@ void lowcase(std::string &str)
 	std::transform(str.begin(), str.end(), str.begin(), tf);
 }
 
+std::string lowcase_copy(std::string const &str)
+{
+	std::string str2{str};
+	lowcase(str2);
+	return str2;
+}
+
 std::string replace(const std::string &str, char old_char, char new_char) noexcept
 {
 	std::string new_str = str;
@@ -286,6 +293,18 @@ std::string strip_word(std::string& line)
 	}
 	line.erase(line.begin(), end_word);
 	return word;
+}
+
+bool nocase_cmp(std::string const &x, std::string const &y) {
+	if (x.length() != y.length()) {
+		return false;
+	}
+	for (int i=0; i < x.length(); ++i) {
+		if (tolower(x[i]) != tolower(y[i])) {
+			return false;
+		}
+	}
+	return true;
 }
 
 void strip_punctuation(std::string &str)

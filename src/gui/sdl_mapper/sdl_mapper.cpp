@@ -103,30 +103,29 @@ void Mapper::SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
 #endif
 }
 
-void Mapper::CreateStringBind(char * line)
+void Mapper::CreateStringBind(std::string line)
 {
-	line=trim(line);
-	char * eventname=strip_word(line);
-	CEvent * event = nullptr;
-	for (const auto& evt : events) {
-		if (!strcasecmp(evt->GetName(), eventname)) {
-			event = evt.get();
-			goto foundevent;
-		}
-	}
-	LOG_WARNING("MAPPER: Can't find key binding for '%s' event", eventname);
-	return ;
-foundevent:
-	CBind * bind = nullptr;
-	for (char * bindline=strip_word(line);*bindline;bindline=strip_word(line)) {
-		for (CBindGroup_it it = bindgroups.begin(); it != bindgroups.end(); ++it) {
-			bind=(*it)->CreateConfigBind(bindline);
-			if (bind) {
-				event->AddBind(bind);
-				bind->SetFlags(bindline);
-				break;
+	trim(line);
+	std::string event_name = strip_word(line);
+	auto event_it = std::find(events.begin(), events.end(),
+	  [&](const auto& evt) { return nocase_cmp(evt.GetName(), event_name); }
+	if (event_it == events.end()) {
+		LOG_WARNING("MAPPER: Can't find key binding for '%s' event", eventname);
+	} else {
+		std::shared_ptr<Bind> bind;
+		std::string bindline;
+		do {
+			bindline = strip_word(line);
+			// Try to find a bindgroup that will process this line
+			for (auto &bind_group: bindgroups) {
+				bind = bind_group.CreateConfigBind(bindline);
+				if (bind) {
+					event->AddBind(bind);
+					bind->SetFlags(bindline);
+					break;
+				}
 			}
-		}
+		} while (bindline != "")
 	}
 }
 
