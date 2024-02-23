@@ -52,6 +52,9 @@
 #include "video.h"
 #include "default_bindings.h"
 
+#include <iostream>
+#include <sstream>
+
 extern SDL_Window* GFX_GetWindow();
 extern void GFX_UpdateDisplayDimensions(int width, int height);
 
@@ -89,7 +92,7 @@ enum BC_Types {
 extern uint8_t int10_font_14[256 * 14];
 
 void Mapper::SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
-						[[maybe_unused]] const Rgb888 &color)
+						[[maybe_unused]] const Rgb888 &color) const
 {
 	// Basic joystick LED support was added in SDL 2.0.14
 #if SDL_VERSION_ATLEAST(2, 0, 14)
@@ -117,7 +120,7 @@ void Mapper::CreateStringBind(std::string line)
 		do {
 			bindline = strip_word(line);
 			// Try to find a bindgroup that will process this line
-			for (auto &bind_group: bindgroups) {
+			for (auto const &bind_group: bindgroups) {
 				bind = bind_group.CreateConfigBind(bindline);
 				if (bind) {
 					event->AddBind(bind);
@@ -132,38 +135,42 @@ void Mapper::CreateStringBind(std::string line)
 void Mapper::ClearAllBinds() {
 	// wait for the auto-typer to complete because it might be accessing events
 	typist.Wait();
-
 	for (const auto& event : events) {
 		event->ClearBinds();
 	}
 }
 
+void Mapper::CreateKeyBinding(std::string str, int value) {
+    std::ostringstream oss;
+}
+
 void Mapper::CreateDefaultBinds() {
 	ClearAllBinds();
-	char buffer[512];
-	Bitu i=0;
+    std::ostringstream oss;
+	Bitu i{0};
 	while (DefaultKeys[i].eventend) {
-		sprintf(buffer, "key_%s \"key %d\"",
-		        DefaultKeys[i].eventend,
-		        static_cast<int>(DefaultKeys[i].key));
-		CreateStringBind(buffer);
+		oss << "key_" << DefaultKeys[i].eventend << " \"key " << DefaultKeys[i].key << "\"";
+		CreateStringBind(oss.str());
 		i++;
 	}
-	sprintf(buffer, "mod_1 \"key %d\"", SDL_SCANCODE_RCTRL);
-	CreateStringBind(buffer);
-	sprintf(buffer, "mod_1 \"key %d\"", SDL_SCANCODE_LCTRL);
-	CreateStringBind(buffer);
-	sprintf(buffer, "mod_2 \"key %d\"", SDL_SCANCODE_RALT);
-	CreateStringBind(buffer);
-	sprintf(buffer, "mod_2 \"key %d\"", SDL_SCANCODE_LALT);
-	CreateStringBind(buffer);
-	sprintf(buffer, "mod_3 \"key %d\"", SDL_SCANCODE_RGUI);
-	CreateStringBind(buffer);
-	sprintf(buffer, "mod_3 \"key %d\"", SDL_SCANCODE_LGUI);
-	CreateStringBind(buffer);
-	for (const auto &handler_event : handlergroup) {
-		handler_event->MakeDefaultBind(buffer);
-		CreateStringBind(buffer);
+
+	// Add the standard modifiers
+	auto add_mod = [&](int const modnum, int const code) {
+		std::ostringstream oss;
+		oss << "mod_" << modnum << " \"key " << SDL_SCANCODE_RCTRL << "\"";
+		CreateStringBind(oss.str());
+	};
+	add_mod(1, SDL_SCANCODE_RCTRL);
+	add_mod(1, SDL_SCANCODE_LCTRL);
+	add_mod(2, SDL_SCANCODE_RALT);
+	add_mod(2, SDL_SCANCODE_LALT);
+	add_mod(3, SDL_SCANCODE_RGUI);
+	add_mod(3, SDL_SCANCODE_LGUI);
+
+	// Make default binds for all handlers
+	for (auto const &handler_event : handlergroup) {
+		std::string const str{handler_event->MakeDefaultBind()};
+		CreateStringBind(str);
 	}
 
 	/* joystick1, buttons 1-6 */

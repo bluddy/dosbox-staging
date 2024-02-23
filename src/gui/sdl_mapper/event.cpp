@@ -1,6 +1,16 @@
 #include "event.h"
 
 
+std::string MakeDefaultBind() const {
+    if (defkey == SDL_SCANCODE_UNKNOWN)
+        return;
+    sprintf(buf, "%s \"key %d%s%s%s\"",
+            entry, static_cast<int>(defkey),
+            defmod & MMOD1 ? " mod1" : "",
+            defmod & MMOD2 ? " mod2" : "",
+            defmod & MMOD3 ? " mod3" : "");
+}
+
 void CEvent::AddBind(std::shared_ptr<CBind> bind) {
 	bind_list.push_front(bind);
 	bind->event=this;

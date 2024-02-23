@@ -40,7 +40,7 @@ private:
     Mapper() {} // Private constructor for singleton
     void SetJoystickLed([[maybe_unused]] SDL_Joystick *joystick,
                          [[maybe_unused]] const Rgb888 &color);
-    void CreateStringBind(char * line);
+    void CreateStringBind(std::string const &line);
     void ClearAllBinds();
     void CreateDefaultBinds();
     void AddHandler(MAPPER_Handler *handler, SDL_Scancode key,
@@ -96,8 +96,8 @@ private:
 		unsigned int num_groups = 0;
 	} sticks = {};
 
-	Typer typist = {};
-	std::string filename = "";
+	Typer typist;
+	std::string filename;
 
     bool autofire{false};
 
