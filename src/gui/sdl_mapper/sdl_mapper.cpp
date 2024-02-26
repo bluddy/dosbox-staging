@@ -173,37 +173,46 @@ void Mapper::CreateDefaultBinds() {
 		CreateStringBind(str);
 	}
 
+	auto bind_button = [&](int const joystick, int const button) {
+		std::ostringstream oss;
+		oss << "jbutton_" << joystick << "_" << button << " \"stick_" << joystick << " button " << button << "\"";
+		CreateStringBind(oss.str());
+	};
+
 	/* joystick1, buttons 1-6 */
-	sprintf(buffer,"jbutton_0_0 \"stick_0 button 0\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jbutton_0_1 \"stick_0 button 1\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jbutton_0_2 \"stick_0 button 2\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jbutton_0_3 \"stick_0 button 3\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jbutton_0_4 \"stick_0 button 4\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jbutton_0_5 \"stick_0 button 5\" ");CreateStringBind(buffer);
+	for (int button = 0; button < 6; ++button) {
+		bind_button(0, i);
+	}
 	/* joystick2, buttons 1-2 */
-	sprintf(buffer,"jbutton_1_0 \"stick_1 button 0\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jbutton_1_1 \"stick_1 button 1\" ");CreateStringBind(buffer);
+	bind_button(1, 0);
+	bind_button(1, 1);
 
+	auto bind_axis = [&](int const joystick, int const axis) {
+		std::ostringstream oss;
+		oss << "jaxis_" << joystick << "_" << axis << "- \"stick_" << joystick << " axis " << axis << "0\" ";
+		CreateStringBind(oss.str());
+		oss.clear();
+		oss << "jaxis_" << joystick << "_" << axis << "+ \"stick_" << joystick << " axis " << axis << "1\" ";
+		CreateStringBind(oss.str());
+	};
 	/* joystick1, axes 1-4 */
-	sprintf(buffer,"jaxis_0_0- \"stick_0 axis 0 0\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jaxis_0_0+ \"stick_0 axis 0 1\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jaxis_0_1- \"stick_0 axis 1 0\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jaxis_0_1+ \"stick_0 axis 1 1\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jaxis_0_2- \"stick_0 axis 2 0\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jaxis_0_2+ \"stick_0 axis 2 1\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jaxis_0_3- \"stick_0 axis 3 0\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jaxis_0_3+ \"stick_0 axis 3 1\" ");CreateStringBind(buffer);
-	/* joystick2, axes 1-2 */
-	sprintf(buffer,"jaxis_1_0- \"stick_1 axis 0 0\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jaxis_1_0+ \"stick_1 axis 0 1\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jaxis_1_1- \"stick_1 axis 1 0\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jaxis_1_1+ \"stick_1 axis 1 1\" ");CreateStringBind(buffer);
+	for (int i=0; i<4; i++) {
+		bind_axis(0, i);
+	}
+	bind_axis(1, 0);
+	bind_axis(1, 1);
 
+	auto bind_hat = [&](int const joystick, int const hat_in, int const hat_out) {
+		std::ostringstream oss;
+		oss << "jhat_" << joystick << "_0_" << hat_in << " \"stick_" << joystick << " hat 0 " << hat_out << "\"";
+		CreateStringBind(oss.str());
+	};
 	/* joystick1, hat */
-	sprintf(buffer,"jhat_0_0_0 \"stick_0 hat 0 1\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jhat_0_0_1 \"stick_0 hat 0 2\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jhat_0_0_2 \"stick_0 hat 0 4\" ");CreateStringBind(buffer);
-	sprintf(buffer,"jhat_0_0_3 \"stick_0 hat 0 8\" ");CreateStringBind(buffer);
+	bind_hat(0, 0, 1);
+	bind_hat(0, 1, 2);
+	bind_hat(0, 2, 4);
+	bind_hat(0, 3, 8);
+
 	LOG_MSG("MAPPER: Loaded default key bindings");
 }
 

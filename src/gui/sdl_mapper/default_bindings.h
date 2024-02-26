@@ -1,4 +1,4 @@
-#include <sdl>
+#include <SDL.h>
 
 static struct {
 	const char *eventend;
