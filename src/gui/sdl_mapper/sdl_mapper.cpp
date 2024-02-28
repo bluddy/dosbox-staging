@@ -233,7 +233,7 @@ void Mapper::AddHandler(MAPPER_Handler *handler, SDL_Scancode const key,
 		std::ostringstream oss;
 		oss << "hand_" << event_name;
 		handlergroup.push_back(
-			std::make_unique<CHandlerEvent>(oss.str(), handler, key, mods, button_name)));
+			std::make_unique<CHandlerEvent>(oss.str(), handler, key, mods, button_name));
 	}
 }
 
@@ -248,8 +248,8 @@ void Mapper::SaveBinds() const {
 		savefile << event->GetName() << " ";
 		for (auto const &bind: event->bindlist) {
 			savefile << "\"";
-			savefile << bind->ConfigName();
-			savefile << bind->AddFlags();
+			savefile << bind->GetConfigName();
+			savefile << bind->GetBindName();
 			savefile << "\"";
 		}
 		savefile << "\n";
@@ -279,9 +279,10 @@ bool Mapper::LoadBindsFromFile(const std::string_view mapperfile_path,
 		        static_cast<int>(lines.size()),
 		        mapper_path.string().c_str());
 
-		mapper.filename = mapper_path.string();
+		filename = mapper_path.string();
 		return true;
 	};
+
 	const auto mapperfiles = std_fs::path("mapperfiles");
 
 	const auto was_loaded = try_loading(mapperfile_path) ||
@@ -315,7 +316,7 @@ void Mapper::CheckEvent(SDL_Event *event)
 void Mapper::QueryJoysticks()
 {
 	// Reset our joystick status
-	mapper.sticks.num = 0;
+	sticks.num = 0;
 
 	JOYSTICK_ParseConfiguredType();
 
@@ -328,7 +329,7 @@ void Mapper::QueryJoysticks()
 	if (SDL_WasInit(SDL_INIT_JOYSTICK) != SDL_INIT_JOYSTICK)
 		SDL_InitSubSystem(SDL_INIT_JOYSTICK);
 
-	const bool wants_auto_config = joytype & (JOY_AUTO | JOY_ONLY_FOR_MAPPING);
+	const bool wants_auto_config{joytype & (JOY_AUTO | JOY_ONLY_FOR_MAPPING)};
 
 	// Record how many joysticks are present and set our desired minimum axis
 	const auto num_joysticks = SDL_NumJoysticks();
@@ -343,7 +344,7 @@ void Mapper::QueryJoysticks()
 
 	// We at least have a value number of joysticks
 	assert(num_joysticks >= 0);
-	mapper.sticks.num = static_cast<unsigned int>(num_joysticks);
+	sticks.num = static_cast<unsigned int>(num_joysticks);
 	if (num_joysticks == 0) {
 		LOG_MSG("MAPPER: No joysticks found");
 		if (wants_auto_config) {
@@ -393,7 +394,7 @@ void Mapper::QueryJoysticks()
 
 void Mapper::CreateBindGroups() {
 	bindgroups.clear();
-	CKeyBindGroup* key_bind_group = new CKeyBindGroup(SDL_NUM_SCANCODES);
+	auto key_bind_group{std::make_unique<CKeyBindGroup>(SDL_NUM_SCANCODES)};
 	keybindgroups.push_back(key_bind_group);
 
 	assert(joytype != JOY_UNSET);
@@ -404,7 +405,7 @@ void Mapper::CreateBindGroups() {
 	if (joytype != JOY_NONE_FOUND) {
 #if defined (REDUCE_JOYSTICK_POLLING)
 		// direct access to the SDL joystick, thus removed from the event handling
-		if (mapper.sticks.num)
+		if (sticks.num)
 			SDL_JoystickEventState(SDL_DISABLE);
 #else
 		// enable joystick event handling
@@ -414,52 +415,42 @@ void Mapper::CreateBindGroups() {
 			return;
 #endif
 		// Free up our previously assigned joystick slot before assinging below
-		if (mapper.sticks.stick[mapper.sticks.num_groups]) {
-			delete mapper.sticks.stick[mapper.sticks.num_groups];
-			mapper.sticks.stick[mapper.sticks.num_groups] = nullptr;
+		if (sticks.stick[sticks.num_groups]) {
+			delete sticks.stick[sticks.num_groups];
+			sticks.stick[sticks.num_groups] = nullptr;
 		}
 
+		//TODO: go over more carefully
 		uint8_t joyno = 0;
 		switch (joytype) {
 		case JOY_DISABLED:
 		case JOY_NONE_FOUND: break;
 		case JOY_4AXIS:
-			mapper.sticks.stick[mapper.sticks.num_groups++] =
-			        new C4AxisBindGroup(joyno, joyno);
-			stickbindgroups.push_back(
-			        new CStickBindGroup(joyno + 1U, joyno + 1U, true));
+			sticks.stick[sticks.num_groups++] = new C4AxisBindGroup(joyno, joyno);
+			stickbindgroups.push_back(new CStickBindGroup(joyno + 1U, joyno + 1U, true));
 			break;
 		case JOY_4AXIS_2:
-			mapper.sticks.stick[mapper.sticks.num_groups++] =
-			        new C4AxisBindGroup(joyno + 1U, joyno);
-			stickbindgroups.push_back(
-			        new CStickBindGroup(joyno, joyno + 1U, true));
+			sticks.stick[mapper.sticks.num_groups++] = new C4AxisBindGroup(joyno + 1U, joyno);
+			stickbindgroups.push_back(new CStickBindGroup(joyno, joyno + 1U, true));
 			break;
 		case JOY_FCS:
-			mapper.sticks.stick[mapper.sticks.num_groups++] =
-			        new CFCSBindGroup(joyno, joyno);
-			stickbindgroups.push_back(
-			        new CStickBindGroup(joyno + 1U, joyno + 1U, true));
+			mapper.sticks.stick[mapper.sticks.num_groups++] = new CFCSBindGroup(joyno, joyno);
+			stickbindgroups.push_back(new CStickBindGroup(joyno + 1U, joyno + 1U, true));
 			break;
 		case JOY_CH:
-			mapper.sticks.stick[mapper.sticks.num_groups++] =
-			        new CCHBindGroup(joyno, joyno);
-			stickbindgroups.push_back(
-			        new CStickBindGroup(joyno + 1U, joyno + 1U, true));
+			mapper.sticks.stick[mapper.sticks.num_groups++] = new CCHBindGroup(joyno, joyno);
+			stickbindgroups.push_back(new CStickBindGroup(joyno + 1U, joyno + 1U, true));
 			break;
 		case JOY_AUTO:
 		case JOY_ONLY_FOR_MAPPING:
 		case JOY_2AXIS:
 		default:
-			mapper.sticks.stick[mapper.sticks.num_groups++] =
-			        new CStickBindGroup(joyno, joyno);
+			mapper.sticks.stick[mapper.sticks.num_groups++] = new CStickBindGroup(joyno, joyno);
 			if ((joyno + 1U) < mapper.sticks.num) {
 				delete mapper.sticks.stick[mapper.sticks.num_groups];
-				mapper.sticks.stick[mapper.sticks.num_groups++] =
-				        new CStickBindGroup(joyno + 1U, joyno + 1U);
+				mapper.sticks.stick[mapper.sticks.num_groups++] = new CStickBindGroup(joyno + 1U, joyno + 1U);
 			} else {
-				stickbindgroups.push_back(
-				        new CStickBindGroup(joyno + 1U, joyno + 1U, true));
+				stickbindgroups.push_back(new CStickBindGroup(joyno + 1U, joyno + 1U, true));
 			}
 			break;
 		}
@@ -501,32 +492,26 @@ void Mapper::RunEvent(uint32_t /*val*/)
 void Mapper::Run(bool const pressed) {
 	if (pressed)
 		return;
-	PIC_AddEvent(MAPPER_RunEvent,0);	//In case mapper deletes the key object that ran it
+	PIC_AddEvent(MAPPER_RunEvent, 0);	//In case mapper deletes the key object that ran it
 }
 
-SDL_Surface* SDL_SetVideoMode_Wrap(int width,int height,int bpp,uint32_t flags);
+SDL_Surface* SDL_SetVideoMode_Wrap(int width, int height, int bpp, uint32_t flags);
 
 void Mapper::Destroy(Section *sec) {
 	(void) sec; // unused but present for API compliance
 
 	// Stop any ongoing typing as soon as possible (because it access events)
-	mapper.typist.Stop();
+	typist.Stop();
 
 	// Release all the accumulated allocations by the mapper
 	events.clear();
 
-	for (auto & ptr : all_binds)
-		delete ptr;
 	all_binds.clear();
 
 	buttons.clear();
 
-	for (auto & ptr : keybindgroups)
-		delete ptr;
 	keybindgroups.clear();
 
-	for (auto & ptr : stickbindgroups)
-		delete ptr;
 	stickbindgroups.clear();
 
 	// Free any allocated sticks
@@ -554,7 +539,7 @@ void Mapper::BindKeys(Section *sec)
 	const auto mapperfile_value = section->Get_string("mapperfile");
 	const auto property = section->Get_path("mapperfile");
 	assert(property);
-	mapper.filename = property->realpath.string();
+	filename = property->realpath.string();
 
 	QueryJoysticks();
 
@@ -566,14 +551,14 @@ void Mapper::BindKeys(Section *sec)
 		CreateBindGroups();
 
 	// Create binds from file or fallback to internals
-	if (!load_binds_from_file(mapper.filename, mapperfile_value))
+	if (!load_binds_from_file(filename, mapperfile_value))
 		CreateDefaultBinds();
 
 	for (const auto& button : buttons) {
 		button->BindColor();
 	}
 
-	if (SDL_GetModState()&KMOD_CAPS)
+	if (SDL_GetModState() & KMOD_CAPS)
 		MAPPER_TriggerEvent(caps_lock_event, false);
 
 	if (SDL_GetModState()&KMOD_NUM)
@@ -599,12 +584,12 @@ std::vector<std::string> Mapper::GetEventNames(const std::string &prefix) {
 void Mapper::AutoType(std::vector<std::string> &sequence,
                      const uint32_t wait_ms,
                      const uint32_t pace_ms) {
-	mapper.typist.Start(&events, sequence, wait_ms, pace_ms);
+	typist.Start(&events, sequence, wait_ms, pace_ms);
 }
 
 void Mapper::AutoTypeStopImmediately()
 {
-	mapper.typist.StopImmediately();
+	typist.StopImmediately();
 }
 
 void Mapper::StartUp(Section* sec)
