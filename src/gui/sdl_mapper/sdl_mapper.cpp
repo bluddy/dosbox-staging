@@ -54,6 +54,9 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
+
+#include "event.h"
 
 extern SDL_Window* GFX_GetWindow();
 extern void GFX_UpdateDisplayDimensions(int width, int height);
@@ -216,44 +219,41 @@ void Mapper::CreateDefaultBinds() {
 	LOG_MSG("MAPPER: Loaded default key bindings");
 }
 
-void Mapper::AddHandler(MAPPER_Handler *handler, SDL_Scancode key,
-                       uint32_t mods, const char *event_name,
-                       const char *button_name)
+void Mapper::AddHandler(MAPPER_Handler *handler, SDL_Scancode const key,
+                       uint32_t const mods, std::string const &event_name,
+                       std::string const &button_name)
 {
 	const bool already_exists{
 		std::find(handlergroup.begin(), handlergroup.end(),
-			[&](const auto& handler_event)
-				{ handler_event->button_name == button_name) }};
+			[&](const auto& handler_event) {
+				return (handler_event->button_name == button_name);
+			})};
 
 	if (!already_exists) {
-		char tempname[17];
-		safe_strcpy(tempname, "hand_");
-		safe_strcat(tempname, event_name);
+		std::ostringstream oss;
+		oss << "hand_" << event_name;
 		handlergroup.push_back(
-			std::make_unique<CHandlerEvent>(tempname, handler, key, mods, button_name)));
+			std::make_unique<CHandlerEvent>(oss.str(), handler, key, mods, button_name)));
 	}
 }
 
-void Mapper::SaveBinds() {
-	FILE * savefile=fopen(filename,"wt+");
-	std::ofsteam savefile(filename)
+void Mapper::SaveBinds() const {
+	std::ofstream savefile{filename};
 
 	if (!savefile.is_open()) {
 		LOG_MSG("MAPPER: Can't open %s for saving the key bindings", filename);
 		return;
 	}
-	char buf[128];
 	for (const auto& event : events) {
-		fprintf(savefile,"%s ",event->GetName());
-		for (CBindList_it bind_it = event->bindlist.begin(); bind_it != event->bindlist.end(); ++bind_it) {
-			CBind * bind=*(bind_it);
-			bind->ConfigName(buf);
-			bind->AddFlags(buf);
-			fprintf(savefile,"\"%s\" ",buf);
+		savefile << event->GetName() << " ";
+		for (auto const &bind: event->bindlist) {
+			savefile << "\"";
+			savefile << bind->ConfigName();
+			savefile << bind->AddFlags();
+			savefile << "\"";
 		}
-		fprintf(savefile,"\n");
+		savefile << "\n";
 	}
-	fclose(savefile);
 	change_action_text("Mapper file saved.", color_white);
 	LOG_MSG("MAPPER: Wrote key bindings to %s", filename);
 }

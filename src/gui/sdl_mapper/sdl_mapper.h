@@ -43,8 +43,8 @@ private:
     void CreateStringBind(std::string const &line);
     void ClearAllBinds();
     void CreateDefaultBinds();
-    void AddHandler(MAPPER_Handler *handler, SDL_Scancode key,
-                    uint32_t mods, const char *event_name, const char *button_name);
+    void AddHandler(MAPPER_Handler *handler, SDL_Scancode const key,
+                    uint32_t const mods, std::string const &event_name, std::string const &button_name);
     void SaveBinds() const;
     bool LoadBindsFromFile(const std::string_view mapperfile_path,
                            const std::string_view mapperfile_name);
