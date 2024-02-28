@@ -126,6 +126,41 @@ std::string CKeyBind::GetBindName() const
     return sdl_scancode_name;
 }
 
+std::string CKeyBind::GetConfigName() const
+{
+    std::ostringstream oss;
+    oss << "key " << key;
+    return oss.str();
+}
+
+std::string CJAxisBind::GetConfigName() const
+{
+    std::ostringstream oss;
+    oss << group->ConfigStart() << " axis " << axis << " " << positive ? 1 : 0;
+    return oss.str();
+}
+
+std::string CJAxisBind::GetBindName() const
+{
+    std::ostringstream oss;
+    oss << group->BindStart() << " Axis " << axis << positive ? "+" : "-";
+    return oss.str();
+}
+
+std::string CJButtonBind::GetConfigName() const
+{
+    std::ostringstream oss;
+    oss << group->ConfigStart() << " button " << button;
+    return oss.str();
+}
+
+std::string CJButtonBind::GetBindName() const
+{
+    std::ostringstream oss;
+    oss << group->BindStart() << " Button " << button;
+    return oss.str();
+}
+
 CJHatBind::CJHatBind(CBindList *_list, CBindGroup *_group, uint8_t _hat, uint8_t _dir)
     : CBind(_list),
         group(_group),

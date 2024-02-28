@@ -50,12 +50,7 @@ public:
 
 	std::string GetBindName() const override;
 
-	std::string ConfigName() const override
-	{
-        std::ostringstream oss;
-        oss << "key " << key;
-        return oss.str();
-	}
+	std::string GetConfigName() const override;
 
 public:
 	SDL_Scancode key;
@@ -77,21 +72,8 @@ public:
 	CJAxisBind(const CJAxisBind&) = delete; // prevent copy
 	CJAxisBind& operator=(const CJAxisBind&) = delete; // prevent assignment
 
-	void ConfigName(char *buf) override
-	{
-		sprintf(buf, "%s axis %d %d",
-		        group->ConfigStart(),
-		        axis,
-		        positive ? 1 : 0);
-	}
-
-	std::string GetBindName() const override
-	{
-		char buf[30];
-		safe_sprintf(buf, "%s Axis %d%s", group->BindStart(), axis,
-		             positive ? "+" : "-");
-		return buf;
-	}
+	std::string GetConfigName(char *buf) const override;
+	std::string GetBindName() const override;
 
 protected:
 	CBindGroup *group;
@@ -110,17 +92,8 @@ public:
 	CJButtonBind(const CJButtonBind&) = delete; // prevent copy
 	CJButtonBind& operator=(const CJButtonBind&) = delete; // prevent assignment
 
-	void ConfigName(char *buf) override
-	{
-		sprintf(buf, "%s button %d", group->ConfigStart(), button);
-	}
-
-	std::string GetBindName() const override
-	{
-		char buf[30];
-		safe_sprintf(buf, "%s Button %d", group->BindStart(), button);
-		return buf;
-	}
+	std::string GetConfigName() const override;
+	std::string GetBindName() const override;
 
 protected:
 	CBindGroup *group;
@@ -134,7 +107,7 @@ public:
 	CJHatBind(const CJHatBind&) = delete; // prevent copy
 	CJHatBind& operator=(const CJHatBind&) = delete; // prevent assignment
 
-	void ConfigName(char *buf) override;
+	std::string GetConfigName() const override;
 	std::string GetBindName() const override;
 
 protected:
