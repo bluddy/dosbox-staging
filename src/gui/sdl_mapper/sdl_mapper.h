@@ -65,8 +65,8 @@ private:
     void AutoTypeStopImmediately();
     void Startup(Section* sec);
 
-#if defined (REDUCE_JOYSTICK_POLLING)
-    void MAPPER_UpdateJoysticks();
+#ifdef REDUCE_JOYSTICK_POLLING
+    void UpdateJoysticks();
 #endif
 
     static constexpr int max_sticks{8};
