@@ -82,8 +82,9 @@ private:
 	SDL_Renderer* renderer  = nullptr;
 	SDL_Texture* font_atlas = nullptr;
 	bool exit = false;
-	CEvent *aevent = nullptr;  // Active Event
-	CBind *abind = nullptr;    // Active Bind
+    // Active event and bind being created right now
+	CEvent *active_event = nullptr;
+	CBind *active_bind = nullptr;
 	CBindList_it abindit = {}; // Location of active bind in list
 	bool redraw = false;
 	bool addbind = false;

@@ -4,15 +4,18 @@
 #include <string>
 #include <memory>
 #include <list>
+#include <SDL.h>
 
 #include "types.h"
+#include "keyboard.h"
+#include "mouse.h"
 
 class CBind;
 typedef std::list<std::shared_ptr<CBind>> CBindList;
 
 class CEvent {
 public:
-	CEvent(std::string _entry) : entry(_entry) {}
+	CEvent(std::string const &_entry) : entry(_entry) {}
 
 	virtual ~CEvent() = default;
 
@@ -32,7 +35,7 @@ public:
 	std::string GetName() const {
 		return entry;
 	}
-	virtual bool IsTrigger() = 0;
+	virtual bool IsTrigger() const = 0;
 
 protected:
 	CBindList bind_list;
@@ -44,8 +47,8 @@ protected:
 /* Class for events which can be ON/OFF only: key presses, joystick buttons, joystick hat */
 class CTriggeredEvent : public CEvent {
 public:
-	CTriggeredEvent(std::string const _entry) : CEvent(_entry) {}
-	bool IsTrigger() const {
+	CTriggeredEvent(std::string const &_entry) : CEvent(_entry) {}
+	bool IsTrigger() const override {
 		return true;
 	}
 	void ActivateEvent(bool ev_trigger, bool skip_action) override;
@@ -55,11 +58,11 @@ public:
 /* class for events which have a non-boolean state: joystick axis movement */
 class CContinuousEvent : public CEvent {
 public:
-	CContinuousEvent(const char* const _entry) : CEvent(_entry) {}
-	bool IsTrigger() override {
+	CContinuousEvent(std::string const &_entry) : CEvent(_entry) {}
+	bool IsTrigger() const override {
 		return false;
 	}
-	void ActivateEvent(bool ev_trigger,bool skip_action) override {
+	void ActivateEvent(bool ev_trigger, bool skip_action) override {
 		if (ev_trigger) {
 			activity++;
 			if (!skip_action) SetActive(true);
@@ -69,8 +72,7 @@ public:
 			if (!GetActivityCount()) SetActive(true);
 		}
 	}
-	void DeActivateEvent(const bool ev_trigger) override
-	{
+	void DeActivateEvent(const bool ev_trigger) override {
 		if (ev_trigger || GetActivityCount() == 0) {
 			// Zero-out this event's pending activity if triggered
 			// or we have no opposite-direction events
@@ -79,7 +81,7 @@ public:
 		}
 	}
 
-	virtual Bitu GetActivityCount() {
+	virtual Bitu GetActivityCount() const {
 		return activity;
 	}
 	virtual void RepostActivity() {}
@@ -87,9 +89,8 @@ public:
 
 class CKeyEvent final : public CTriggeredEvent {
 public:
-	CKeyEvent(const char* const entry, KBD_KEYS k)
-	        : CTriggeredEvent(entry),
-	          key(k)
+	CKeyEvent(std::string const &entry, KBD_KEYS k) :
+		CTriggeredEvent(entry), key(k)
 	{}
 
 	void SetActive(bool yesno) override {
@@ -103,7 +104,7 @@ class CMouseButtonEvent final : public CTriggeredEvent {
 public:
 	CMouseButtonEvent() = delete;
 
-	CMouseButtonEvent(const char* const entry, const MouseButtonId id)
+	CMouseButtonEvent(std::string const &entry, MouseButtonId const id)
 	        : CTriggeredEvent(entry),
 	          button_id(id)
 	{}
@@ -114,12 +115,12 @@ public:
 	}
 
 private:
-	const MouseButtonId button_id = MouseButtonId::None;
+	MouseButtonId const button_id{MouseButtonId::None};
 };
 
 class CJAxisEvent final : public CContinuousEvent {
 public:
-	CJAxisEvent(const char* const entry, Bitu s, Bitu a, bool p,
+	CJAxisEvent(std::string const &entry, Bitu const s, Bitu const a, bool const p,
 	            CJAxisEvent* op_axis)
 	        : CContinuousEvent(entry),
 	          stick(s),

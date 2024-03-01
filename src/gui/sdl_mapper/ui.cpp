@@ -1,4 +1,5 @@
 #include "ui.h"
+#include <SDL.h>
 
 void MapperUI::DrawButtons() const
 {
@@ -467,13 +468,18 @@ void MapperUI::MappingEvents() {
 			mapper.exit=true;
 			break;
 		default:
-			if (mapper.addbind) for (CBindGroup_it it = bindgroups.begin(); it != bindgroups.end(); ++it) {
-				CBind * newbind=(*it)->CreateEventBind(&event);
-				if (!newbind) continue;
-				mapper.aevent->AddBind(newbind);
-				SetActiveEvent(mapper.aevent);
-				mapper.addbind=false;
-				break;
+			if (addbind) {
+				// Find a bindgroup that can edd this event
+				for (auto const &bindgroup: bindgroups) {
+					auto const newbind = bindgroup.CreateEventbind(event);
+					if (newbind) {
+						active_event->AddBind(newbind);
+						newbind->AddEvent(mapper.active_event);
+						SetActiveEvent(mapper.active_event);
+						addbind=false;
+						break;
+					}
+				}
 			}
 		}
 	}

@@ -133,7 +133,7 @@ CStickBindGroup::~CStickBindGroup()
     hat_lists = nullptr;
 }
 
-CBind * CStickBindGroup::CreateConfigBind(char *& buf)
+std::shared_ptr<CBind> CStickBindGroup::CreateConfigBind(std::string& buf)
 {
     if (strncasecmp(configname,buf,strlen(configname))) return nullptr;
     strip_word(buf);

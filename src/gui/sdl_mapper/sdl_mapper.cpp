@@ -124,9 +124,11 @@ void Mapper::CreateStringBind(std::string line)
 			bindline = strip_word(line);
 			// Try to find a bindgroup that will process this line
 			for (auto const &bind_group: bindgroups) {
-				bind = bind_group.CreateConfigBind(bindline);
+				auto const bind = bind_group.CreateConfigBind(bindline);
 				if (bind) {
+					// Make them point to each other
 					event->AddBind(bind);
+					bind->AddEvent(event);
 					bind->SetFlags(bindline);
 					break;
 				}
