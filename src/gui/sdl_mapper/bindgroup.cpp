@@ -1,41 +1,52 @@
+#include <memory>
 
-void CBindGroup::ActivateBindList(CBindList * list,Bits value,bool ev_trigger) {
-	assert(list);
-	Bitu validmod=0;
-	CBindList_it it;
-	for (it = list->begin(); it != list->end(); ++it) {
-		if (((*it)->mods & mapper.mods) == (*it)->mods) {
-			if (validmod<(*it)->mods) validmod=(*it)->mods;
-		}
-	}
-	for (it = list->begin(); it != list->end(); ++it) {
-		if (validmod==(*it)->mods) (*it)->ActivateBind(value,ev_trigger);
-	}
-}
+#include "bindgroup.h"
+#include "mapper.h"
+#include "string_utils.h"
 
-void CBindGroup::DeactivateBindList(CBindList * list,bool ev_trigger) {
-	assert(list);
-	CBindList_it it;
-	for (it = list->begin(); it != list->end(); ++it) {
-		(*it)->DeActivateBind(ev_trigger);
+void CBindGroup::ActivateBindList(CBindList &bind_list, Bits const value, bool const ev_trigger) {
+	Bitu validmod{0};
+
+	for (auto const &bind : bind_list) {
+		if (((bind->mods & mapper.mods) == bind->mods) && (validmod < bind->mods)) {
+                validmod = bind->mods;
+        }
+	}
+	for (auto &bind : bind_list) {
+		if (validmod == bind->mods) {
+            bind->Activate(value, ev_trigger);
+        }
 	}
 }
 
-CBind CKeyBindGroup::*CreateConfigBind(char *&buf)
+void CBindGroup::DeactivateBindList(CBindList &bind_list, bool const ev_trigger) {
+	for (auto &bind: bind_list) {
+		bind->Deactivate(ev_trigger);
+	}
+}
+
+std::shared_ptr<CBind> CKeyBindGroup::CreateKeyBind(SDL_Scancode const _key) const {
+    auto bind = std::make_shared<CKeyBind>(key_bind_lists[(Bitu)_key], _key);
+    return bind;
+}
+
+std::shared_ptr<CBind> CKeyBindGroup::CreateConfigBind(std::string const &str) const
 {
-    if (strncasecmp(buf, configname, strlen(configname)))
+    if (!nocase_cmp(str, configname)) {
         return nullptr;
-    strip_word(buf);
-    long code = atol(strip_word(buf));
+    }
+    std::string str2{strip_word(str)};
+    long code{atol(str2.cstr())};
     assert(code > 0);
-    return CreateKeyBind((SDL_Scancode)code);
+    return CreateKeyBind(static_cast<SDL_Scancode>(code));
 }
 
-CBind CKeyBindGroup::*CreateEventBind(SDL_Event *event)
+std::shared_ptr<CBind> CKeyBindGroup::CreateEventBind(SDL_Event const &event)
 {
-    if (event->type != SDL_KEYDOWN)
+    if (event.type != SDL_KEYDOWN)
         return nullptr;
-    return CreateKeyBind(event->key.keysym.scancode);
+
+    return CreateKeyBind(event.key.keysym.scancode);
 }
 
 bool CKeyBindGroup::CheckEvent(SDL_Event * event) override {

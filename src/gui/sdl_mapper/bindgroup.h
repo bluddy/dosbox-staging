@@ -1,62 +1,66 @@
 #ifndef SDL_MAPPER_CBINDGROUP_H
 #define SDL_MAPPER_CBINDGROUP_H
 
+#include <list>
+#include <memory>
+
+#include "bind.h"
+
+typedef std::list<std::shared_ptr<CBind>> CBindList;
+
+class Mapper;
+
+// These are actual physical devices
 class CBindGroup {
 public:
-	CBindGroup() {
-		bindgroups.push_back(this);
+	CBindGroup(Mapper &_mapper) : mapper(_mapper)
+	{
+		// bindgroups.push_back(this); // Must always add to bindgroups
 	}
 	virtual ~CBindGroup() = default;
-	void ActivateBindList(CBindList * list,Bits value,bool ev_trigger);
-	void DeactivateBindList(CBindList * list,bool ev_trigger);
-	virtual CBind * CreateConfigBind(char *&buf)=0;
-	virtual CBind * CreateEventBind(SDL_Event * event)=0;
+	void ActivateBindList(CBindList& list, Bits const value, bool const ev_trigger);
+	void DeactivateBindList(CBindList& list, bool const ev_trigger);
+	// Create a bind based on a configuration string
+	virtual std::shared_ptr<CBind> CreateConfigBind(std::string const &buf) const = 0;
+	// Create a bind based on an SDL event
+	virtual std::shared_ptr<CBind> CreateEventBind(SDL_Event const &event) const = 0;
 
-	virtual bool CheckEvent(SDL_Event * event)=0;
-	virtual const char * ConfigStart() = 0;
-	virtual const char * BindStart() = 0;
+	virtual bool CheckEvent(SDL_Event const &event) const = 0;
+	virtual std::string const &ConfigStart() = 0;
+	virtual std::string const BindStart() = 0;
+protected:
+	Mapper &mapper; // Reference to sdl_mapper
 };
 
-class CKeyBindGroup final : public  CBindGroup {
+class CKeyBindGroup final : public CBindGroup {
 public:
-	CKeyBindGroup(Bitu _keys)
+	CKeyBindGroup(Bitu _num_keys)
 		: CBindGroup(),
-		  lists(new CBindList[_keys]),
-		  keys(_keys)
-	{
-		for (size_t i = 0; i < keys; i++)
-			lists[i].clear();
-	}
-
-	~CKeyBindGroup() override
-	{
-		delete[] lists;
-		lists = nullptr;
-	}
+		  key_bind_lists(_num_keys)
+	{}
 
 	CKeyBindGroup(const CKeyBindGroup&) = delete; // prevent copy
 	CKeyBindGroup& operator=(const CKeyBindGroup&) = delete; // prevent assignment
 
-	CBind* CreateConfigBind(char *&buf) override;
+	std::shared_ptr<CBind> CreateConfigBind(std::string const &str) override;
+	std::shared_ptr<CBind> CreateEventBind(SDL_Event const &event) override;
+	// Create a bind based on an SDL scancode
+	std::shared_ptr<CBind> CreateKeyBind(SDL_Scancode const _key) const;
 
-	CBind* CreateEventBind(SDL_Event *event) override;
+	bool CheckEvent(SDL_Event const &event) override;
 
-	bool CheckEvent(SDL_Event * event) override;
 
-	CBind* CreateKeyBind(SDL_Scancode _key) {
-		return new CKeyBind(&lists[(Bitu)_key],_key);
-	}
 private:
-	const char * ConfigStart() override {
+	std::string const &ConfigStart() override {
 		return configname;
 	}
-	const char * BindStart() override {
+	std::string const BindStart() override {
 		return "Key";
 	}
 protected:
-	const char *configname = "key";
-	CBindList *lists = nullptr;
-	Bitu keys = 0;
+	std::string const configname{"key"};
+	// vectors of Lists of bindings
+	std::vector<std::list<std::shared_ptr<CBind>>> key_bind_lists;
 };
 
 class CStickBindGroup : public CBindGroup {
