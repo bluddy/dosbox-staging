@@ -9,13 +9,15 @@
 #include "types.h"
 #include "keyboard.h"
 #include "mouse.h"
+#include "sdl_mapper.h"
 
 class CBind;
-typedef std::list<std::shared_ptr<CBind>> CBindList;
+
+// Events are the things that dosbox sends to the program
 
 class CEvent {
 public:
-	CEvent(std::string const &_entry) : entry(_entry) {}
+	CEvent(Mapper &_mapper, std::string const &_name) : mapper(_mapper), name(_name) {}
 
 	virtual ~CEvent() = default;
 
@@ -23,206 +25,162 @@ public:
 	void AddBind(std::shared_ptr<CBind> bind);
 	void ClearBinds();
 	virtual void SetActive(bool yesno) = 0;
-	virtual void ActivateEvent(bool ev_trigger, bool skip_action) = 0;
-	virtual void DeActivateEvent(bool ev_trigger) = 0;
-	void DeActivateAll();
+	virtual void Activate(bool ev_trigger, bool skip_action) = 0;
+	virtual void Deactivate(bool ev_trigger) = 0;
+	void DeactivateAll();
 	void SetValue(Bits value) {
 		current_value = value;
 	}
 	Bits GetValue() const {
 		return current_value;
 	}
-	std::string GetName() const {
-		return entry;
+	std::string const &GetName() const {
+		return name;
 	}
 	virtual bool IsTrigger() const = 0;
 
 protected:
-	CBindList bind_list;
-	Bitu activity = 0;
-	std::string entry;
+	// Bindings of this event
+	std::list<std::shared_ptr<CBind>> bind_list;
+	Bitu activity = 0;  // Number of times triggered?
+	std::string name;   // Name of event
 	Bits current_value = 0;
+	Mapper &mapper;     // Reference to the sdl mapper
 };
 
-/* Class for events which can be ON/OFF only: key presses, joystick buttons, joystick hat */
+// Class for events which can be ON/OFF only: key presses, joystick buttons, joystick hat
 class CTriggeredEvent : public CEvent {
 public:
-	CTriggeredEvent(std::string const &_entry) : CEvent(_entry) {}
+	CTriggeredEvent(Mapper &_mapper, std::string const &_name) : CEvent(_mapper, _name) {}
 	bool IsTrigger() const override {
 		return true;
 	}
-	void ActivateEvent(bool ev_trigger, bool skip_action) override;
-	void DeActivateEvent(bool /*ev_trigger*/) override;
+	void Activate(bool ev_trigger, bool skip_action) override;
+	void Deactivate(bool /*ev_trigger*/) override;
 };
 
-/* class for events which have a non-boolean state: joystick axis movement */
+// Class for events which have a non-boolean state: joystick axis movement
 class CContinuousEvent : public CEvent {
 public:
-	CContinuousEvent(std::string const &_entry) : CEvent(_entry) {}
+	CContinuousEvent(CMapper &_mapper, std::string const &_name) :
+	 CEvent(_mapper, _name) {}
+
 	bool IsTrigger() const override {
 		return false;
 	}
-	void ActivateEvent(bool ev_trigger, bool skip_action) override {
-		if (ev_trigger) {
-			activity++;
-			if (!skip_action) SetActive(true);
-		} else {
-			/* test if no trigger-activity is present, this cares especially
-			   about activity of the opposite-direction joystick axis for example */
-			if (!GetActivityCount()) SetActive(true);
-		}
-	}
-	void DeActivateEvent(const bool ev_trigger) override {
-		if (ev_trigger || GetActivityCount() == 0) {
-			// Zero-out this event's pending activity if triggered
-			// or we have no opposite-direction events
-			activity = 0;
-			SetActive(false);
-		}
-	}
 
-	virtual Bitu GetActivityCount() const {
-		return activity;
-	}
+	void Activate(bool const ev_trigger, bool const skip_action) override;
+
+	void Deactivate(bool const ev_trigger) override;
+
+	virtual Bitu GetActivityCount() const { return activity; }
 	virtual void RepostActivity() {}
 };
 
 class CKeyEvent final : public CTriggeredEvent {
 public:
-	CKeyEvent(std::string const &entry, KBD_KEYS k) :
-		CTriggeredEvent(entry), key(k)
+	CKeyEvent(Mapper &_mapper, std::string const &name, KBD_KEYS const k) :
+		CTriggeredEvent(_mapper, name), key(k)
 	{}
 
-	void SetActive(bool yesno) override {
-		KEYBOARD_AddKey(key, yesno);
-	}
+	void SetActive(bool yesno) override;
 
-	KBD_KEYS key;
+protected:
+	KBD_KEYS const key;
 };
 
 class CMouseButtonEvent final : public CTriggeredEvent {
 public:
 	CMouseButtonEvent() = delete;
 
-	CMouseButtonEvent(std::string const &entry, MouseButtonId const id)
-	        : CTriggeredEvent(entry),
-	          button_id(id)
+	CMouseButtonEvent(Mapper &_mapper, std::string const &name, MouseButtonId const id)
+		: CTriggeredEvent(_mapper, name), button_id(id)
 	{}
 
-	void SetActive(const bool pressed) override
-	{
-		MOUSE_EventButton(button_id, pressed);
-	}
-
-private:
+	void SetActive(const bool pressed) override;
+	
+protected:
 	MouseButtonId const button_id{MouseButtonId::None};
 };
 
 class CJAxisEvent final : public CContinuousEvent {
 public:
-	CJAxisEvent(std::string const &entry, Bitu const s, Bitu const a, bool const p,
-	            CJAxisEvent* op_axis)
-	        : CContinuousEvent(entry),
-	          stick(s),
-	          axis(a),
-	          positive(p),
-	          opposite_axis(op_axis)
-	{
-		if (opposite_axis)
-			opposite_axis->SetOppositeAxis(this);
-	}
+	CJAxisEvent(Mapper &_mapper, std::string const &name, Bitu const s,
+				Bitu const a, bool const p,
+				CJAxisEvent* op_axis);
 
 	CJAxisEvent(const CJAxisEvent&) = delete; // prevent copy
 	CJAxisEvent& operator=(const CJAxisEvent&) = delete; // prevent assignment
 
-	void SetActive(bool /*moved*/) override {
-		virtual_joysticks[stick].axis_pos[axis]=(int16_t)(GetValue()*(positive?1:-1));
-	}
-	Bitu GetActivityCount() override {
-		return activity|opposite_axis->activity;
-	}
-	void RepostActivity() override {
-		/* caring for joystick movement into the opposite direction */
-		opposite_axis->SetActive(true);
-	}
+	void SetActive(bool /*moved*/) override;
+	Bitu GetActivityCount() const override;
+	void RepostActivity() override;
 protected:
 	void SetOppositeAxis(CJAxisEvent * _opposite_axis) {
-		opposite_axis=_opposite_axis;
+		// Circularity requires raw pointer here
+		opposite_axis =_opposite_axis;
 	}
-	Bitu stick,axis;
+	Bitu stick;
+	Bitu axis;
 	bool positive;
-	CJAxisEvent * opposite_axis;
+	CJAxisEvent* opposite_axis;  // Need raw pointer here
 };
 
 class CJButtonEvent final : public CTriggeredEvent {
 public:
-	CJButtonEvent(const char* const entry, Bitu s, Bitu btn)
-	        : CTriggeredEvent(entry),
+	CJButtonEvent(Mapper &_mapper, std::string const &_name, Bitu s, Bitu btn)
+	        : CTriggeredEvent(_mapper, _name),
 	          stick(s),
-	          button(btn)
-	{}
-
-	void SetActive(bool pressed) override
-	{
-		virtual_joysticks[stick].button_pressed[button]=pressed;
-	}
+	          button(btn) {}
+	void SetActive(bool pressed) override;
 
 protected:
-	Bitu stick,button;
+	Bitu stick;
+	Bitu button;
 };
 
 class CJHatEvent final : public CTriggeredEvent {
 public:
-	CJHatEvent(const char* const entry, Bitu s, Bitu h, Bitu d)
-	        : CTriggeredEvent(entry),
-	          stick(s),
-	          hat(h),
-	          dir(d)
-	{}
+	CJHatEvent(Mapper &_mapper, std::string const &name, Bitu const s, Bitu const h, Bitu const d)
+	        : CTriggeredEvent(_mapper, name),
+	          stick(s), hat(h), dir(d) {}
 
-	void SetActive(bool pressed) override
-	{
-		virtual_joysticks[stick].hat_pressed[(hat<<2)+dir]=pressed;
-	}
+	void SetActive(bool pressed) override;
 
 protected:
-	Bitu stick,hat,dir;
+	Bitu stick;
+	Bitu hat;
+	Bitu dir;
 };
 
 class CModEvent final : public CTriggeredEvent {
 public:
-	CModEvent(const char* const _entry, int _wmod)
-	        : CTriggeredEvent(_entry),
+	CModEvent(Mapper &_mapper, std::string const &_name, int const _wmod)
+	        : CTriggeredEvent(_mapper, _name),
 	          wmod(_wmod)
 	{}
 
-	void SetActive(bool yesno) override
-	{
-		if (yesno)
-			mapper.mods |= (static_cast<Bitu>(1) << (wmod-1));
-		else
-			mapper.mods &= ~(static_cast<Bitu>(1) << (wmod-1));
-	}
+	void SetActive(bool yesno) override;
 
 protected:
 	int wmod;
 };
 
 class CHandlerEvent final : public CTriggeredEvent {
+	// Custom handler associated with key
 public:
-	CHandlerEvent(const char *entry,
+	CHandlerEvent(Mapper &_mapper,
+		          std::string const &name,
 	              MAPPER_Handler *handle,
-	              SDL_Scancode k,
-	              uint32_t mod,
-	              const char *bname)
-	        : CTriggeredEvent(entry),
+	              SDL_Scancode const k,
+	              uint32_t const mod,
+	              std::string const &_button_name)
+	        : CTriggeredEvent(_mapper, name),
 	          defkey(k),
 	          defmod(mod),
 	          handler(handle),
-	          button_name(bname)
-	{
-		handlergroup.push_back(this);
-	}
+	          button_name(_button_name)
+	{}
 
 	~CHandlerEvent() override = default;
 	CHandlerEvent(const CHandlerEvent&) = delete; // prevent copy

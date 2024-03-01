@@ -13,6 +13,8 @@ typedef std::list<std::shared_ptr<CBind>> CBindList;
 
 class CEvent;
 
+// Binds are the real-world device bindings
+
 class CBind {
 public:
 	CBind() {}
@@ -26,8 +28,8 @@ public:
 	void SetFlagsFromStr(std::string flag_s);
 
     // use value-boundary for on/off events
-	void ActivateBind(Bits _value, bool ev_trigger, bool skip_action=false);
-	void DeActivateBind(bool ev_trigger);
+	void Activate(Bits _value, bool ev_trigger, bool skip_action=false);
+	void DeActivate(bool ev_trigger);
 	virtual std::string GetConfigName() const = 0;
 	virtual std::string GetBindName() const = 0;
 

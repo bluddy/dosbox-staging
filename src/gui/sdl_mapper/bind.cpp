@@ -52,13 +52,13 @@ void CBind::SetFlagsFromStr(std::string flag_s)
     } while (word != "");
 }
 
-void CBind::ActivateBind(Bits _value, bool ev_trigger, bool skip_action=false) {
+void CBind::Activate(Bits _value, bool ev_trigger, bool skip_action=false) {
     if (event->IsTrigger()) {
         /* use value-boundary for on/off events */
         if (_value>25000) {
             event->SetValue(_value);
             if (active) return;
-            event->ActivateEvent(ev_trigger,skip_action);
+            event->ActivateEvent(ev_trigger, skip_action);
             active=true;
         } else {
             if (active) {

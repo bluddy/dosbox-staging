@@ -53,12 +53,12 @@ private:
     void QueryJoysticks();
     void CreateBindGroups();
     bool IsUsingJoysticks() const;
-    void LosingFocus();
+    void HandleLosingFocus();
     void RunEvent(uint32_t);
     void Run(bool const pressed);
     void Destroy(Section *sec);
     void BindKeys(Section *sec);
-    std::vector<std::string> Mapper::GetEventNames(const std::string &prefix);
+    std::vector<std::string> GetEventNames(const std::string &prefix) const;
     void AutoType(std::vector<std::string> &sequence,
                      const uint32_t wait_ms,
                      const uint32_t pace_ms);
@@ -77,18 +77,23 @@ private:
     static constexpr int max_axis{10};
     static constexpr int max_hat{2};
 
-    std::list<CStickBindGroup *> stickbindgroups;
+    // Groups of actual joystick bindings
+    std::list<std::shared_ptr<CStickBindGroup>> stickbindgroups;
+
 	SDL_Window *window = nullptr;
 	SDL_Renderer* renderer  = nullptr;
 	SDL_Texture* font_atlas = nullptr;
 	bool exit = false;
+
     // Active event and bind being created right now
-	CEvent *active_event = nullptr;
-	CBind *active_bind = nullptr;
+    // Weak pointers to prevent loops
+	std::weak_ptr<CEvent> active_event;
+	std::weak_prt<CBind> active_bind = nullptr;
+
 	CBindList_it abindit = {}; // Location of active bind in list
 	bool redraw = false;
-	bool addbind = false;
-	Bitu mods = 0;
+	bool addbind = false;  // Whether we're in the add bind state
+	Bitu mods = 0;  // Currently active modifiers
 
     // Detected info about joysticks
 	struct {
@@ -108,7 +113,8 @@ private:
     std::list<std::unique_ptr<CKeyBindGroup>> keybindgroups;
     std::vector<std::unique_ptr<CHandlerEvent>> handlergroup;
     CBindList holdlist;
-    std::list<std::unique_ptr<CBind>> all_binds;
+    // Contains all binds. Don't let individual events manage this
+    std::list<std::unique_ptr<CBind>> all_binds; 
     CKeyEvent * caps_lock_event=nullptr;
     CKeyEvent * num_lock_event=nullptr;
 };

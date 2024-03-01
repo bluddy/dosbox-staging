@@ -475,7 +475,7 @@ void Mapper::UpdateJoysticks() {
 
 #endif
 
-void Mapper::LosingFocus()
+void Mapper::HandleLosingFocus()
 {
 	for (const auto& event : events) {
 		if (event.get() != caps_lock_event && event.get() != num_lock_event) {
@@ -569,10 +569,9 @@ void Mapper::BindKeys(Section *sec)
 	GFX_RegenerateWindow(sec);
 }
 
-std::vector<std::string> Mapper::GetEventNames(const std::string &prefix) {
+std::vector<std::string> Mapper::GetEventNames(std::string const &prefix) const {
 	std::vector<std::string> key_names;
-	key_names.reserve(events.size());
-	for (auto & e : events) {
+	for (auto const &e: events) {
 		const std::string name = e->GetName();
 		const std::size_t found = name.find(prefix);
 		if (found != std::string::npos) {
