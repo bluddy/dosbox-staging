@@ -3,6 +3,7 @@
 #include "bindgroup.h"
 #include "mapper.h"
 #include "string_utils.h"
+#include "joystick.h"
 
 void CBindGroup::ActivateBindList(CBindList &bind_list, Bits const value, bool const ev_trigger) {
 	Bitu validmod{0};
@@ -49,35 +50,33 @@ std::shared_ptr<CBind> CKeyBindGroup::CreateEventBind(SDL_Event const &event)
     return CreateKeyBind(event.key.keysym.scancode);
 }
 
-bool CKeyBindGroup::CheckEvent(SDL_Event * event) override {
-    if (event->type!=SDL_KEYDOWN && event->type!=SDL_KEYUP) return false;
+bool CKeyBindGroup::CheckEvent(SDL_Event &event) {
+    if (event->type != SDL_KEYDOWN && event->type != SDL_KEYUP) {
+        return false;
+    }
     uintptr_t key = static_cast<uintptr_t>(event->key.keysym.scancode);
-    if (event->type==SDL_KEYDOWN) ActivateBindList(&lists[key],0x7fff,true);
-    else DeactivateBindList(&lists[key],true);
+    if (event->type == SDL_KEYDOWN) {
+        ActivateBindList(key_bind_lists[key], 0x7fff, true);
+    }
+    else {
+        DeactivateBindList(key_bind_lists[key], true);
+    }
     return 0;
 }
 
-CStickBindGroup::CStickBindGroup(int _stick_index, uint8_t _emustick, bool _dummy = false)
-        : CBindGroup(),
+CStickBindGroup::CStickBindGroup(Mapper &_mapper, int _stick_index, uint8_t _emustick, bool _dummy = false)
+        : CBindGroup(_mapper),
             stick_index(_stick_index), // the number of the device in the system
             emustick(_emustick), // the number of the emulated device
-            is_dummy(_dummy)
+            is_dummy(_dummy),
+            configname("stick" + emustick),
+
 {
-    sprintf(configname, "stick_%u", static_cast<unsigned>(emustick));
     if (is_dummy)
         return;
 
-    // initialize binding lists and position data
-    pos_axis_lists = new CBindList[MAXAXIS];
-    neg_axis_lists = new CBindList[MAXAXIS];
-    button_lists = new CBindList[MAXBUTTON];
-    hat_lists = new CBindList[4];
-
     // initialize emulated joystick state
-    emulated_axes=2;
-    emulated_buttons=2;
-    emulated_hats=0;
-    JOYSTICK_Enable(emustick,true);
+    JOYSTICK_Enable(emustick, true);
 
     // From the SDL doco
     // (https://wiki.libsdl.org/SDL2/SDL_JoystickOpen):
@@ -95,9 +94,9 @@ CStickBindGroup::CStickBindGroup(int _stick_index, uint8_t _emustick, bool _dumm
     stick_id = SDL_JoystickInstanceID(sdl_joystick);
 
     set_joystick_led(sdl_joystick, on_color);
-    if (sdl_joystick==nullptr) {
-        button_wrap=emulated_buttons;
-        axes=MAXAXIS;
+    if (!sdl_joystick) {
+        button_wrap = emulated_buttons;
+        axes = max_axis;
         return;
     }
 

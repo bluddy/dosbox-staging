@@ -3,8 +3,10 @@
 
 #include <list>
 #include <memory>
+#include <array>
 
 #include "bind.h"
+#include "sdl_mapper.h"
 
 typedef std::list<std::shared_ptr<CBind>> CBindList;
 
@@ -34,8 +36,8 @@ protected:
 
 class CKeyBindGroup final : public CBindGroup {
 public:
-	CKeyBindGroup(Bitu _num_keys)
-		: CBindGroup(),
+	CKeyBindGroup(Mapper &_mapper, Bitu _num_keys)
+		: CBindGroup(_mapper),
 		  key_bind_lists(_num_keys)
 	{}
 
@@ -65,7 +67,7 @@ protected:
 
 class CStickBindGroup : public CBindGroup {
 public:
-	CStickBindGroup(int _stick_index, uint8_t _emustick, bool _dummy = false);
+	CStickBindGroup(Mapper &_mapper, int _stick_index, uint8_t _emustick, bool _dummy = false);
 
 	~CStickBindGroup() override;
 
@@ -97,30 +99,32 @@ private:
 	}
 
 protected:
-	CBindList *pos_axis_lists = nullptr;
-	CBindList *neg_axis_lists = nullptr;
-	CBindList *button_lists = nullptr;
-	CBindList *hat_lists = nullptr;
-	int axes = 0;
-	int emulated_axes = 0;
-	int buttons = 0;
-	int button_cap = 0;
-	int button_wrap = 0;
-	uint8_t emulated_buttons = 0;
-	int hats = 0;
-	int emulated_hats = 0;
+	std::array<CBindList, max_axis> pos_axis_lists;
+	std::array<CBindList, max_axis> neg_axis_lists;
+	std::array<CBindList, max_button> button_lists;
+	std::array<CBindList, 4> hat_lists;
+	int axes{0};
+	int emulated_axes{2};
+	int emulated_hats{0};
+	uint8_t emulated_buttons{0};
+	int buttons{0};
+	int button_cap{0};
+	int button_wrap{0};
+	int hats{0};
     // Instance ID of the joystick as it appears in SDL events
 	int stick_id{-1};
 	// Index of the joystick in the system
 	int stick_index{-1};
 	uint8_t emustick;
 	SDL_Joystick *sdl_joystick = nullptr;
-	char configname[10];
-	unsigned button_autofire[MAXBUTTON] = {};
-	bool old_button_state[MAXBUTTON] = {};
-	bool old_pos_axis_state[MAXAXIS] = {};
-	bool old_neg_axis_state[MAXAXIS] = {};
-	uint8_t old_hat_state[MAXHAT] = {};
+	// Name of joystick
+	std::string const configname;
+	std::array<unsigned int, max_button> button_autofire;
+	std::array<bool, max_button> old_button_state;
+	std::array<bool, max_button> old_pos_axis_state;
+	std::array<bool, max_axis> old_neg_axis_state;
+	std::array<uint8_t, max_hat> old_hat_state;
+	// Is this a real device
 	bool is_dummy;
 };
 

@@ -29,6 +29,15 @@
 class CEvent;
 class CBind;
 
+static constexpr int max_sticks{8};
+static constexpr int max_active{16};
+// Use 36 for Android (KEYCODE_BUTTON_1..16 are mapped to SDL buttons 20..35)
+static constexpr int max_button{36};
+static constexpr int max_button_cap{16};
+static constexpr int max_axis{10};
+static constexpr int max_hat{2};
+
+
 class Mapper {
     // Singleton pattern
     static Mapper& get() {
@@ -68,14 +77,6 @@ private:
 #ifdef REDUCE_JOYSTICK_POLLING
     void UpdateJoysticks();
 #endif
-
-    static constexpr int max_sticks{8};
-    static constexpr int max_active{16};
-    // Use 36 for Android (KEYCODE_BUTTON_1..16 are mapped to SDL buttons 20..35)
-    static constexpr int max_button{36};
-    static constexpr int max_button_cap{16};
-    static constexpr int max_axis{10};
-    static constexpr int max_hat{2};
 
     // Groups of actual joystick bindings
     std::list<std::shared_ptr<CStickBindGroup>> stickbindgroups;
