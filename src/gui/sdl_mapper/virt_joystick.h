@@ -7,9 +7,9 @@ constexpr int MAX_VJOY_AXIS{8};
 
 struct VirtJoystick
 {
-	int16_t axis_pos[MAX_VJOY_AXIS] = {0};
-	bool hat_pressed[MAX_VJOY_HAT] = {false};
-	bool button_pressed[MAX_VJOY_BUTTONS] = {false};
+	std::array<int16_t, MAX_VJOY_AXIS> axis_pos{0};
+	std::array<bool, MAX_VJOY_HAT> hat_pressed{false};
+	std::array<bool, MAX_VJOY_BUTTONS> button_pressed{false};
 };
 
 #endif

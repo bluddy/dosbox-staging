@@ -1,9 +1,11 @@
 #include <memory>
+#include <cmath>
 
 #include "bindgroup.h"
 #include "mapper.h"
 #include "string_utils.h"
 #include "joystick.h"
+#include "virt_joystick.h"
 
 void CBindGroup::ActivateBindList(CBindList &bind_list, Bits const value, bool const ev_trigger) {
 	Bitu validmod{0};
@@ -100,28 +102,36 @@ CStickBindGroup::CStickBindGroup(Mapper &_mapper, int _stick_index, uint8_t _emu
         return;
     }
 
-    const int sdl_axes = SDL_JoystickNumAxes(sdl_joystick);
+    // Detect SDL axes
+    const int sdl_axes{SDL_JoystickNumAxes(sdl_joystick)};
     if (sdl_axes < 0)
         LOG_MSG("SDL: Can't detect axes; %s", SDL_GetError());
-    axes = clamp(sdl_axes, 0, MAXAXIS);
+    num_axes = clamp(sdl_axes, 0, max_axis);
 
-    const int sdl_hats = SDL_JoystickNumHats(sdl_joystick);
+    // Detect SDL hats
+    const int sdl_hats{SDL_JoystickNumHats(sdl_joystick)};
     if (sdl_hats < 0)
         LOG_MSG("SDL: Can't detect hats; %s", SDL_GetError());
-    hats = clamp(sdl_hats, 0, MAXHAT);
+    num_hats = clamp(sdl_hats, 0, max_hat);
 
-    buttons = SDL_JoystickNumButtons(sdl_joystick); // TODO returns -1 on error
-    button_wrap = buttons;
-    button_cap = buttons;
+    // Detect number of buttons
+    num_buttons = SDL_JoystickNumButtons(sdl_joystick); // TODO returns -1 on error
+    if (num_buttons < 0)
+        LOG_MSG("SDL: Can't detect buttons; %s", SDL_GetError());
+
+    button_wrap = num_buttons;
+    button_cap = num_buttons;
     if (button_wrapping_enabled) {
-        button_wrap=emulated_buttons;
-        if (buttons>MAXBUTTON_CAP) button_cap = MAXBUTTON_CAP;
+        button_wrap = emulated_buttons;
+        if (num_buttons > max_button_cap) {
+            button_cap = max_button_cap;
+        }
     }
-    if (button_wrap > MAXBUTTON)
-        button_wrap = MAXBUTTON;
+    if (button_wrap > max_button)
+        button_wrap = max_button;
 
     LOG_MSG("MAPPER: Initialised %s with %d axes, %d buttons, and %d hat(s)",
-            SDL_JoystickNameForIndex(stick_index), axes, buttons, hats);
+            SDL_JoystickNameForIndex(stick_index), num_axes, num_buttons, num_hats);
 }
 
 CStickBindGroup::~CStickBindGroup()
@@ -129,74 +139,78 @@ CStickBindGroup::~CStickBindGroup()
     set_joystick_led(sdl_joystick, off_color);
     SDL_JoystickClose(sdl_joystick);
     sdl_joystick = nullptr;
-
-    delete[] pos_axis_lists;
-    pos_axis_lists = nullptr;
-
-    delete[] neg_axis_lists;
-    neg_axis_lists = nullptr;
-
-    delete[] button_lists;
-    button_lists = nullptr;
-
-    delete[] hat_lists;
-    hat_lists = nullptr;
 }
 
-std::shared_ptr<CBind> CStickBindGroup::CreateConfigBind(std::string& buf)
+std::shared_ptr<CBind> CStickBindGroup::CreateConfigBind(std::string& str) const
 {
-    if (strncasecmp(configname,buf,strlen(configname))) return nullptr;
-    strip_word(buf);
-    char *type = strip_word(buf);
-    CBind *bind = nullptr;
-    if (!strcasecmp(type,"axis")) {
-        int ax = atoi(strip_word(buf));
-        int pos = atoi(strip_word(buf));
+    if (!nocase_cmp(str, configname)) {
+        return nullptr;
+    }
+    
+    std::string type = strip_word(str);
+    std::shared_ptr<CBind> bind = nullptr;
+    if (nocase_cmp(type, "axis")) {
+        int const ax{std::atoi(strip_word(str).c_str())};
+        int const pos{std::atoi(strip_word(str).c_str())};
         bind = CreateAxisBind(ax, pos > 0); // TODO double check, previously it was != 0
-    } else if (!strcasecmp(type, "button")) {
-        int but = atoi(strip_word(buf));
+
+    } else if (nocase_cmp(type, "button")) {
+        int const but{atoi(strip_word(str).c_str())};
         bind = CreateButtonBind(but);
-    } else if (!strcasecmp(type, "hat")) {
-        uint8_t hat = static_cast<uint8_t>(atoi(strip_word(buf)));
-        uint8_t dir = static_cast<uint8_t>(atoi(strip_word(buf)));
+
+    } else if (nocase_cmp(type, "hat")) {
+        uint8_t const hat{static_cast<uint8_t>(atoi(strip_word(str).c_str()))};
+        uint8_t const dir{static_cast<uint8_t>(atoi(strip_word(str).c_str()))};
         bind = CreateHatBind(hat, dir);
     }
     return bind;
 }
 
-CBind * CStickBindGroup::(SDL_Event * event) {
-    if (event->type==SDL_JOYAXISMOTION) {
-        const int axis_id = event->jaxis.axis;
-        const auto axis_position = event->jaxis.value;
+std::shared_ptr<CBind> CStickBindGroup::CreateEventBind(SDL_Event const &event) const {
+    if (event.type == SDL_JOYAXISMOTION) {
+        int const axis_id{event.jaxis.axis};
+        auto const axis_position = event.jaxis.value;
 
-        if (event->jaxis.which != stick_id)
+        if (event.jaxis.which != stick_id) {
             return nullptr;
+        }
 #if defined(REDUCE_JOYSTICK_POLLING)
-        if (axis_id >= axes)
+        if (axis_id >= axes) {
             return nullptr;
+        }
 #endif
-        if (abs(axis_position) < 25000)
+        if (abs(axis_position) < 25000) {
             return nullptr;
+        }
 
         // Axis IDs 2 and 5 are triggers on six-axis controllers
-        const bool is_trigger = (axis_id == 2 || axis_id == 5) && axes == 6;
-        const bool toggled = axis_position > 0 || is_trigger;
+        const bool is_trigger{(axis_id == 2 || axis_id == 5) && num_axes == 6};
+        const bool toggled{axis_position > 0 || is_trigger};
         return CreateAxisBind(axis_id, toggled);
 
-    } else if (event->type == SDL_JOYBUTTONDOWN) {
-        if (event->jbutton.which != stick_id)
+    } else if (event.type == SDL_JOYBUTTONDOWN) {
+        if (event.jbutton.which != stick_id) {
             return nullptr;
+        }
 #if defined (REDUCE_JOYSTICK_POLLING)
-        return CreateButtonBind(event->jbutton.button%button_wrap);
+        return CreateButtonBind(event.jbutton.button % num_button_wrap);
 #else
-        return CreateButtonBind(event->jbutton.button);
+        return CreateButtonBind(event.jbutton.button);
 #endif
-    } else if (event->type==SDL_JOYHATMOTION) {
-        if (event->jhat.which != stick_id) return nullptr;
-        if (event->jhat.value == 0) return nullptr;
-        if (event->jhat.value>(SDL_HAT_UP|SDL_HAT_RIGHT|SDL_HAT_DOWN|SDL_HAT_LEFT)) return nullptr;
-        return CreateHatBind(event->jhat.hat, event->jhat.value);
-    } else return nullptr;
+    } else if (event.type == SDL_JOYHATMOTION) {
+        if (event.jhat.which != stick_id) {
+            return nullptr;
+        }
+        if (event.jhat.value == 0) {
+            return nullptr;
+        }
+        if (event.jhat.value > (SDL_HAT_UP|SDL_HAT_RIGHT|SDL_HAT_DOWN|SDL_HAT_LEFT)) {
+            return nullptr;
+        }
+        return CreateHatBind(event.jhat.hat, event.jhat.value);
+    } else {
+        return nullptr;
+    }
 }
 
 bool CStickBindGroup::CheckEvent(SDL_Event * event) {
@@ -227,26 +241,32 @@ bool CStickBindGroup::CheckEvent(SDL_Event * event) {
         return false;
 }
 
-virtual void CStickBindGroup::UpdateJoystick() {
-    if (is_dummy) return;
-    /* query SDL joystick and activate bindings */
+void CStickBindGroup::UpdateJoystick() {
+    if (is_dummy) {
+        return;
+    }
+    // query SDL joystick and activate bindings
     ActivateJoystickBoundEvents();
 
-    bool button_pressed[MAXBUTTON];
-    std::fill_n(button_pressed, MAXBUTTON, false);
+    std::array<bool, max_button> button_pressed{false};
+
+    // Check for virtual joystick input
     for (int i = 0; i < MAX_VJOY_BUTTONS; i++) {
-        if (virtual_joysticks[emustick].button_pressed[i])
-            button_pressed[i % button_wrap]=true;
+        if (mapper.virtual_joysticks[emustick].button_pressed[i]) {
+            button_pressed[i % num_button_wrap] = true;
+        }
     }
-    for (uint8_t i = 0; i < emulated_buttons; i++) {
-        if (autofire && (button_pressed[i]))
-            JOYSTICK_Button(emustick,i,(++button_autofire[i])&1);
-        else
-            JOYSTICK_Button(emustick,i,button_pressed[i]);
+    // Send signal to SDL
+    for (int i = 0; i < emulated_buttons; i++) {
+        if (mapper.autofire && button_pressed[i]) {
+            JOYSTICK_Button(emustick, i, (++button_autofire[i]) & 1);
+        } else {
+            JOYSTICK_Button(emustick, i, button_pressed[i]);
+        }
     }
 
-    JOYSTICK_Move_X(emustick, virtual_joysticks[emustick].axis_pos[0]);
-    JOYSTICK_Move_Y(emustick, virtual_joysticks[emustick].axis_pos[1]);
+    JOYSTICK_Move_X(emustick, mapper.virtual_joysticks[emustick].axis_pos[0]);
+    JOYSTICK_Move_Y(emustick, mapper.virtual_joysticks[emustick].axis_pos[1]);
 }
 
 void CStickBindGroup::ActivateJoystickBoundEvents() {

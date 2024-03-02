@@ -28,6 +28,7 @@
 
 class CEvent;
 class CBind;
+class VirtJoystick;
 
 static constexpr int max_sticks{8};
 static constexpr int max_active{16};

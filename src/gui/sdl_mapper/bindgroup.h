@@ -24,12 +24,12 @@ public:
 	void DeactivateBindList(CBindList& list, bool const ev_trigger);
 	// Create a bind based on a configuration string
 	virtual std::shared_ptr<CBind> CreateConfigBind(std::string const &buf) const = 0;
-	// Create a bind based on an SDL event
+	// Create a bind based on an SDL event that is fired by the user
 	virtual std::shared_ptr<CBind> CreateEventBind(SDL_Event const &event) const = 0;
 
 	virtual bool CheckEvent(SDL_Event const &event) const = 0;
-	virtual std::string const &ConfigStart() = 0;
-	virtual std::string const BindStart() = 0;
+	virtual std::string const &ConfigStart() const = 0;
+	virtual std::string const BindStart() const = 0;
 protected:
 	Mapper &mapper; // Reference to sdl_mapper
 };
@@ -44,19 +44,19 @@ public:
 	CKeyBindGroup(const CKeyBindGroup&) = delete; // prevent copy
 	CKeyBindGroup& operator=(const CKeyBindGroup&) = delete; // prevent assignment
 
-	std::shared_ptr<CBind> CreateConfigBind(std::string const &str) override;
-	std::shared_ptr<CBind> CreateEventBind(SDL_Event const &event) override;
+	std::shared_ptr<CBind> CreateConfigBind(std::string const &str) const override;
+	std::shared_ptr<CBind> CreateEventBind(SDL_Event const &event) const override;
 	// Create a bind based on an SDL scancode
 	std::shared_ptr<CBind> CreateKeyBind(SDL_Scancode const _key) const;
 
-	bool CheckEvent(SDL_Event const &event) override;
+	bool CheckEvent(SDL_Event const &event) const override;
 
 
 private:
-	std::string const &ConfigStart() override {
+	std::string const &ConfigStart() const override {
 		return configname;
 	}
-	std::string const BindStart() override {
+	std::string const BindStart() const override {
 		return "Key";
 	}
 protected:
@@ -67,30 +67,30 @@ protected:
 
 class CStickBindGroup : public CBindGroup {
 public:
-	CStickBindGroup(Mapper &_mapper, int _stick_index, uint8_t _emustick, bool _dummy = false);
+	CStickBindGroup(Mapper &_mapper, int const _stick_index, uint8_t const _emustick, bool const _dummy = false);
 
 	~CStickBindGroup() override;
 
 	CStickBindGroup(const CStickBindGroup&) = delete; // prevent copy
 	CStickBindGroup& operator=(const CStickBindGroup&) = delete; // prevent assignment
 
-	CBind * CreateConfigBind(char *& buf) override;
-	CBind * CreateEventBind(SDL_Event * event) override;
-	bool CheckEvent(SDL_Event * event) override;
+	std::shared_ptr<CBind> CreateConfigBind(std::string const &buf) const override;
+	std::shared_ptr<CBind> CreateEventBind(SDL_Event const &event) const override;
+	bool CheckEvent(SDL_Event const &event) const override;
 	virtual void UpdateJoystick();
 
 	void ActivateJoystickBoundEvents();
 
 private:
-	CBind * CreateAxisBind(int axis, bool positive);
-	CBind * CreateButtonBind(int button);
-	CBind *CreateHatBind(uint8_t hat, uint8_t value);
-	const char * ConfigStart() override
+	std::shared_ptr<CBind> CreateAxisBind(int axis, bool positive) const;
+	std::shared_ptr<CBind> CreateButtonBind(int button) const;
+	std::shared_ptr<CBind> CreateHatBind(uint8_t hat, uint8_t value) const;
+	std::string const &ConfigStart()  const override
 	{
 		return configname;
 	}
 
-	const char * BindStart() override
+	std::string const BindStart()  const override
 	{
 		if (sdl_joystick)
 			return SDL_JoystickNameForIndex(stick_index);
@@ -103,22 +103,29 @@ protected:
 	std::array<CBindList, max_axis> neg_axis_lists;
 	std::array<CBindList, max_button> button_lists;
 	std::array<CBindList, 4> hat_lists;
-	int axes{0};
+
 	int emulated_axes{2};
 	int emulated_hats{0};
 	uint8_t emulated_buttons{0};
-	int buttons{0};
+
+	int num_axes{0};
+	int num_buttons{0};
+	int num_hats{0};
+
 	int button_cap{0};
-	int button_wrap{0};
-	int hats{0};
+	// The number to wrap our joystick by (buttons begin to overlap after this)
+	int num_button_wrap{0};
+
     // Instance ID of the joystick as it appears in SDL events
 	int stick_id{-1};
 	// Index of the joystick in the system
 	int stick_index{-1};
 	uint8_t emustick;
 	SDL_Joystick *sdl_joystick = nullptr;
+
 	// Name of joystick
 	std::string const configname;
+	// Counter used for autofire: will increment and send signal on odd numbers
 	std::array<unsigned int, max_button> button_autofire;
 	std::array<bool, max_button> old_button_state;
 	std::array<bool, max_button> old_pos_axis_state;
