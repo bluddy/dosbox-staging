@@ -76,7 +76,7 @@ public:
 
 	std::shared_ptr<CBind> CreateConfigBind(std::string const &buf) const override;
 	std::shared_ptr<CBind> CreateEventBind(SDL_Event const &event) const override;
-	bool CheckEvent(SDL_Event const &event) const override;
+	bool CheckEvent(SDL_Event const &event) override;
 	virtual void UpdateJoystick();
 
 	void ActivateJoystickBoundEvents();
@@ -99,20 +99,21 @@ private:
 	}
 
 protected:
+	// Bindings for each axis, button and hat
 	std::array<CBindList, max_axis> pos_axis_lists;
 	std::array<CBindList, max_axis> neg_axis_lists;
 	std::array<CBindList, max_button> button_lists;
 	std::array<CBindList, 4> hat_lists;
 
-	int emulated_axes{2};
-	int emulated_hats{0};
-	uint8_t emulated_buttons{0};
+	int num_emulated_axes{2};
+	int num_emulated_hats{0};
+	uint8_t num_emulated_buttons{0};
 
 	int num_axes{0};
 	int num_buttons{0};
 	int num_hats{0};
 
-	int button_cap{0};
+	int num_button_cap{0};
 	// The number to wrap our joystick by (buttons begin to overlap after this)
 	int num_button_wrap{0};
 
@@ -127,6 +128,7 @@ protected:
 	std::string const configname;
 	// Counter used for autofire: will increment and send signal on odd numbers
 	std::array<unsigned int, max_button> button_autofire;
+	// Memory of previous state to tell if we had a state change
 	std::array<bool, max_button> old_button_state;
 	std::array<bool, max_button> old_pos_axis_state;
 	std::array<bool, max_axis> old_neg_axis_state;
@@ -137,31 +139,26 @@ protected:
 
 class C4AxisBindGroup final : public  CStickBindGroup {
 public:
-	C4AxisBindGroup(uint8_t _stick, uint8_t _emustick) : CStickBindGroup(_stick, _emustick);
-
-	bool CheckEvent(SDL_Event * event) override;
+	C4AxisBindGroup(Mapper &_mapper, uint8_t const _stick, uint8_t const _emustick) : CStickBindGroup(_mapper, _stick, _emustick);
+	bool CheckEvent(SDL_Event const &event) override;
 	void UpdateJoystick() override;
 };
 
 class CFCSBindGroup final : public  CStickBindGroup {
 public:
-	CFCSBindGroup(uint8_t _stick, uint8_t _emustick) : CStickBindGroup(_stick, _emustick);
-
-	bool CheckEvent(SDL_Event * event) override;
-
+	CFCSBindGroup(Mapper &_mapper, uint8_t const _stick, uint8_t const _emustick) : CStickBindGroup(_mapper, _stick, _emustick);
+	bool CheckEvent(SDL_Event const &event) override;
 	void UpdateJoystick() override;
 
 private:
-	uint8_t old_hat_position = 0;
+	uint8_t old_hat_position{0};
 	void DecodeHatPosition(Uint8 hat_pos);
 };
 
 class CCHBindGroup final : public CStickBindGroup {
 public:
-	CCHBindGroup(uint8_t _stick, uint8_t _emustick);
-
-	bool CheckEvent(SDL_Event * event) override;
-
+	CCHBindGroup(Mapper &_mapper, uint8_t const _stick, uint8_t const _emustick);
+	bool CheckEvent(SDL_Event const &event) override;
 	void UpdateJoystick() override;
 
 protected:
