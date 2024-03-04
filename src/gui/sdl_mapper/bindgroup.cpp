@@ -684,7 +684,7 @@ void CCHBindGroup::UpdateJoystick() {
         if (virtual_joysticks[0].hat_pressed[(i<<2) + 0]) {
             hat_pos |= SDL_HAT_UP;
         } else if (virtual_joysticks[0].hat_pressed[(i<<2) + 2]) {
-            hat_pos|=SDL_HAT_DOWN;
+            hat_pos |= SDL_HAT_DOWN;
         }
         if (virtual_joysticks[0].hat_pressed[(i<<2) + 3]) {
             hat_pos |= SDL_HAT_LEFT;
@@ -717,7 +717,6 @@ void CCHBindGroup::UpdateJoystick() {
             bt_state = button_priority[i];
         }
     }
-
     if (bt_state > 15) {
         bt_state = 15;
     }
