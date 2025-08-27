@@ -5,7 +5,9 @@
 #ifndef DOSBOX_CPU_H
 #define DOSBOX_CPU_H
 
-#include "dosbox.h"
+#include "dosbox_config.h"
+#include "misc/types.h"
+#include "misc/compiler.h"
 
 #include "config/config.h"
 #include "misc/support.h"

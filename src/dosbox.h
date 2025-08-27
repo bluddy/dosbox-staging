@@ -14,7 +14,6 @@
 
 #include "identity.h"
 
-
 #include "dosbox_app.h"
 
 #include "machine_type.h"

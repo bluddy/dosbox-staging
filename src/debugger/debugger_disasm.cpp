@@ -62,7 +62,8 @@ Any comments/updates/bug reports to:
    Thanks and enjoy!
 
 */
-#include "dosbox.h"
+#include "dosbox_config.h"
+#include "misc/types.h"
 #if C_DEBUGGER
 #include "hardware/memory.h"
 #include <cstdarg>

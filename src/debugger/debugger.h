@@ -4,7 +4,8 @@
 #ifndef DOSBOX_DEBUG_H
 #define DOSBOX_DEBUG_H
 
-#include "dosbox.h"
+#include "dosbox_config.h"
+#include "misc/types.h"
 #include "hardware/memory.h"
 
 #if C_DEBUGGER

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 
-#include "dosbox.h"
+#include "dosbox_config.h"
+#include "misc/types.h"
 
 #if C_DEBUGGER
 #include "config/config.h"
