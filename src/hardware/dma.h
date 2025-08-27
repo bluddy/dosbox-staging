@@ -5,7 +5,8 @@
 #ifndef DOSBOX_DMA_H
 #define DOSBOX_DMA_H
 
-#include "dosbox.h"
+#include "misc/types.h"
+#include "misc/logging.h"
 
 #include <cassert>
 #include <functional>
