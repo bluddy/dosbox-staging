@@ -9,9 +9,7 @@
 
 #ifndef DOSBOX_DOSBOX_H
 	// So the right config.h gets included for C_DEBUGGER
-	#include "dosbox_config.h"
-#include "misc/types.h"
-#include "misc/logging.h"
+	#include "dosbox.h"
 #endif
 
 #ifndef DOSBOX_MEM_H
