@@ -1,5 +1,9 @@
 ## Progress on Untangling the .h Mess
 
+### Basic Rules
+- Build with meson
+- Avoid touching libglad if you can - it's a mountain of trouble. Keep opengl and glad as is.
+
 ### Initial Analysis
 - Identified `dosbox.h` as a central, problematic header due to its extensive inclusions.
 - Found 81 C++ files directly including `dosbox.h`.
