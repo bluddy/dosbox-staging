@@ -8,7 +8,8 @@
 #ifndef DOSBOX_IDE_H
 #define DOSBOX_IDE_H
 
-#include "dosbox.h"
+#include "misc/types.h"
+#include "config/config.h"
 
 constexpr int MAX_IDE_CONTROLLERS = 4;
 
