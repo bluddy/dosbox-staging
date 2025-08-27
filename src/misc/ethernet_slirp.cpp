@@ -9,7 +9,8 @@
 #include <sys/socket.h> // AF_INET
 #endif
 
-#include "dosbox.h"
+#include "misc/logging.h"
+#include "identity.h"
 #include "dosbox_config.h"
 #include "utils/dynlib.h"
 #include "ethernet_slirp.h"

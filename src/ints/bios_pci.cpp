@@ -6,7 +6,12 @@
 
 #include "cpu/callback.h"
 #include "utils/checks.h"
-#include "dosbox.h"
+#include "misc/logging.h"
+#include "hardware/pci_bus.h"
+#include "hardware/port.h"
+#include "cpu/registers.h"
+#include "cpu/callback.h"
+#include "misc/support.h"
 #include "hardware/port.h"
 #include "hardware/pci_bus.h"
 #include "cpu/registers.h"

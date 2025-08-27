@@ -7,7 +7,8 @@
 
 #include "utils/checks.h"
 #include "config/config.h"
-#include "dosbox.h"
+#include "config/config.h"
+#include "misc/logging.h"
 #include "utils/fs_utils.h"
 #include "utils/string_utils.h"
 #include "misc/unicode.h"

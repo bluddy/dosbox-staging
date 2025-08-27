@@ -6,7 +6,9 @@
 
 #include "utils/checks.h"
 #include "config/config.h"
-#include "dosbox.h"
+#include "misc/logging.h"
+#include "misc/messages.h"
+#include "dos/dos_inc.h"
 #include "utils/fs_utils.h"
 #include "hardware/input/keyboard.h"
 #include "hardware/input/mouse.h"

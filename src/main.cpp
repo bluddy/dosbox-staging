@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText:  2020-2025 The DOSBox Staging Team
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "dosbox.h"
+#include "dosbox_app.h"
 
 // When compiling for Windows, SDL converts function 'main' to 'WinMain' and
 // performs some additional initialization.

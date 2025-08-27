@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 
-#include "dosbox.h"
+#include "misc/logging.h"
+#include "machine_type.h"
+#include "constants.h"
 #include "hardware/memory.h"
 #include "cpu/callback.h"
 #include "cpu/registers.h"

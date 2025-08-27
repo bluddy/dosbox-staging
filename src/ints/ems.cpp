@@ -2,7 +2,19 @@
 // SPDX-FileCopyrightText:  2002-2021 The DOSBox Team
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "dosbox.h"
+#include "misc/logging.h"
+#include "machine_type.h"
+#include "ints/bios.h"
+#include "cpu/callback.h"
+#include "cpu/cpu.h"
+#include "dos/dos_inc.h"
+#include "hardware/dma.h"
+#include "hardware/port.h"
+#include "hardware/memory.h"
+#include "cpu/paging.h"
+#include "cpu/registers.h"
+#include "config/setup.h"
+#include "misc/support.h"
 
 #include <algorithm>
 #include <cstring>
