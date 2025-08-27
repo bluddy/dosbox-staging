@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "misc/logging.h"
+#include "misc/messages.h"
 #include "misc/types.h"
 
 #include <cassert>
@@ -11,6 +12,7 @@
 #include <limits>
 #include <unordered_map>
 
+#include "dosbox_app.h"
 #include "hardware/port.h"
 #include "misc/support.h"
 

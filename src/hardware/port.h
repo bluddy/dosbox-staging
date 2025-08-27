@@ -5,7 +5,7 @@
 #ifndef DOSBOX_PORT_H
 #define DOSBOX_PORT_H
 
-#include "dosbox.h"
+#include "misc/types.h"
 
 #include <functional>
 
