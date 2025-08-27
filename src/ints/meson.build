@@ -25,6 +25,7 @@ libints = static_library(
         sdl2_dep,
         ghc_dep,
         libloguru_dep,
+        libiir_dep,
     ],
     cpp_args: warnings,
 )
