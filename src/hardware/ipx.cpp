@@ -2,6 +2,8 @@
 // SPDX-FileCopyrightText:  2002-2021 The DOSBox Team
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "dosbox_config.h"
+
 #if C_IPX
 
 #include <cinttypes>
@@ -11,7 +13,6 @@
 
 #include <SDL_net.h>
 
-#include "dosbox_config.h"
 #include "dosbox_app.h"
 #include "misc/logging.h"
 #include "misc/types.h"
