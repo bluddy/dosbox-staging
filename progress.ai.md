@@ -3,6 +3,7 @@
 ### Basic Rules
 - Build with meson
 - Avoid touching libglad if you can - it's a mountain of trouble. Keep opengl and glad as is.
+- Commit to git after every change that passes compilation.
 
 ### Initial Analysis
 - Identified `dosbox.h` as a central, problematic header due to its extensive inclusions.
