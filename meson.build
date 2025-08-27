@@ -1137,11 +1137,11 @@ if host_machine.system() in ['windows', 'cygwin']
 endif
 
 # Set up include directories
-incdir = [
-    include_directories('src', '.'),
-    include_directories('src/libs', is_system: true),
-    include_directories('src/libs/include', is_system: true),
-]
+incdir = include_directories(
+    'src', '.',
+    'src/libs',
+    'src/libs/include',
+)
 
 
 # A list of DOSBox's internal libraries populated
