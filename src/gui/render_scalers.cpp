@@ -7,7 +7,11 @@
 //Maybe just do the cache checking back into the simple scalers so they can
 //just handle it all in one go, but this seems to work well enough for now
 
-#include "dosbox.h"
+#include "dosbox_config.h"
+#include "misc/types.h"
+#include "misc/logging.h"
+#include "dosbox_app.h"
+#include "misc/video.h"
 #include "gui/render.h"
 #include <cstring>
 
