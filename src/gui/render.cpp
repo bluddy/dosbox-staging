@@ -2,7 +2,16 @@
 // SPDX-FileCopyrightText:  2002-2021 The DOSBox Team
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "dosbox.h"
+#include "dosbox_config.h"
+#include "misc/types.h"
+#include "misc/logging.h"
+#include "dosbox_app.h"
+#include "misc/video.h"
+#include "hardware/video/vga.h"
+#include "config/config.h"
+#include "gui/mapper.h"
+#include "shader_manager.h"
+#include "gui/render.h"
 
 #include <cassert>
 #include <cmath>
