@@ -7,10 +7,11 @@
 
 #include "config/setup.h"
 #include "cpu/registers.h"
-#include "dosbox.h"
 #include "hardware/input/mouse.h"
 #include "hardware/port.h"
+#include "misc/logging.h"
 #include "misc/support.h"
+#include "misc/types.h"
 #include "utils/checks.h"
 #include "utils/string_utils.h"
 
