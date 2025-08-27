@@ -4,7 +4,8 @@
 #ifndef DOSBOX_PAGING_H
 #define DOSBOX_PAGING_H
 
-#include "dosbox.h"
+#include "dosbox_config.h"
+#include "misc/types.h"
 #include "debugger/debugger.h"
 #include <vector>
 

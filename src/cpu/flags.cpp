@@ -6,7 +6,8 @@
 	Probably still some bugs left in here.
 */
 
-#include "dosbox.h"
+#include "misc/types.h"
+#include "misc/logging.h"
 
 #include "cpu/cpu.h"
 #include "hardware/pic.h"

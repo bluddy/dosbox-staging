@@ -9,7 +9,8 @@
 
 #include "cpu/callback.h"
 #include "cpu/cpu.h"
-#include "dosbox.h"
+#include "misc/types.h"
+#include "misc/logging.h"
 #include "utils/math_utils.h"
 #include "hardware/memory.h"
 

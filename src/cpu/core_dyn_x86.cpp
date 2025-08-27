@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 
-#include "dosbox.h"
+#include "dosbox_config.h"
+#include "misc/types.h"
+#include "cpu/flags.h"
+#include "dosbox_app.h"
 
 #if (C_DYNAMIC_X86)
 
