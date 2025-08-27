@@ -5,7 +5,11 @@
 #ifndef DOSBOX_CONFIG_H
 #define DOSBOX_CONFIG_H
 
-#include "dosbox.h"
+#include "shell/command_line.h"
+#include "config/setup.h"
+#include "misc/types.h"
+#include "misc/logging.h"
+#include "identity.h"
 
 #include <cassert>
 #include <deque>
