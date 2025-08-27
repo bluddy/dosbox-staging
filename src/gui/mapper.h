@@ -5,12 +5,14 @@
 #ifndef DOSBOX_MAPPER_H
 #define DOSBOX_MAPPER_H
 
-#include "dosbox.h"
+#include "identity.h"
 
 #include <string>
 #include <vector>
 
 #include <SDL.h>
+
+class Section;
 
 #define MAPPERFILE "mapper-sdl2-" DOSBOX_VERSION ".map"
 
