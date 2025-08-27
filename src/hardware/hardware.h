@@ -5,7 +5,7 @@
 #ifndef DOSBOX_HARDWARE_H
 #define DOSBOX_HARDWARE_H
 
-#include "dosbox.h"
+#include "misc/types.h"
 
 #include <cstdio>
 #include <string>
