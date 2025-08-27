@@ -5,7 +5,7 @@
 #define DOSBOX_STRING_UTILS_H
 
 
-
+#include <cstdint>
 #include <cassert>
 #include <climits>
 #include <cstdarg>
