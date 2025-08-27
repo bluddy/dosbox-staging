@@ -5,7 +5,7 @@
 #ifndef DOSBOX_CROSS_H
 #define DOSBOX_CROSS_H
 
-#include "dosbox.h"
+#include "misc/types.h"
 
 #include <cstdio>
 #include <ctime>
