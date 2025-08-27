@@ -94,6 +94,7 @@ libcpu = static_library(
         ghc_dep,
         tracy_dep,
         libloguru_dep,
+        libdos_dep,
     ],
     cpp_args: warnings,
 )
