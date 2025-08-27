@@ -10,7 +10,7 @@
 #include "config/config.h"
 #include "config/setup.h"
 #include "cpu/cpu.h"
-#include "dosbox.h"
+
 #include "gui/mapper.h"
 #include "gui/sdlmain.h"
 #include "misc/support.h"

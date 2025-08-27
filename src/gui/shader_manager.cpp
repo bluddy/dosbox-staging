@@ -14,12 +14,16 @@
 
 #include <SDL.h>
 
-#include "dosbox.h"
 #include "misc/cross.h"
 #include "misc/video.h"
 #include "utils/checks.h"
 #include "utils/math_utils.h"
 #include "utils/string_utils.h"
+#include "misc/logging.h"
+#include "misc/compiler.h"
+#include "dosbox_app.h"
+#include "machine_type.h"
+#include "config/config.h"
 
 CHECK_NARROWING();
 
