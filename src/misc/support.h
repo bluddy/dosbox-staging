@@ -5,7 +5,7 @@
 #ifndef DOSBOX_SUPPORT_H
 #define DOSBOX_SUPPORT_H
 
-#include "dosbox.h"
+
 
 #include <algorithm>
 #include <cassert>
@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "misc/std_filesystem.h"
+#include "dosbox_config.h"
 
 // TODO This is a rather horrible dumping ground of everything... Next time
 // you add something to it, break it up into separate files (e.g.,

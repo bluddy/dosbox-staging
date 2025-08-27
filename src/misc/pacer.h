@@ -5,7 +5,7 @@
 #ifndef DOSBOX_PACER_H
 #define DOSBOX_PACER_H
 
-#include "dosbox.h"
+
 
 #include <string>
 

@@ -4,8 +4,6 @@
 #ifndef DOSBOX_BIOS_DISK_H
 #define DOSBOX_BIOS_DISK_H
 
-#include "dosbox.h"
-
 #include <cstdio>
 #include <array>
 #include <memory>
@@ -13,6 +11,7 @@
 #include "ints/bios.h"
 #include "dos/dos_inc.h"
 #include "hardware/memory.h"
+#include "misc/cross.h"
 
 /* The Section handling Bios Disk Access */
 #define BIOS_MAX_DISK 10

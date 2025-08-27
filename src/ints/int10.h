@@ -4,14 +4,16 @@
 #ifndef DOSBOX_INT10_H
 #define DOSBOX_INT10_H
 
-#include "dosbox.h"
-
 #include <optional>
 #include <vector>
 
 #include "utils/bit_view.h"
 #include "hardware/video/vga.h"
 #include "hardware/memory.h"
+#include "cpu/callback.h"
+#include "dos/dos_inc.h"
+#include "dos/dos_memory.h"
+#include "machine_type.h"
 
 // forward declarations
 class Rgb666;

@@ -5,7 +5,7 @@
 #ifndef DOSBOX_COMMAND_LINE_H
 #define DOSBOX_COMMAND_LINE_H
 
-#include "dosbox.h"
+
 
 #include <list>
 #include <optional>

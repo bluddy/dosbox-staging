@@ -4,9 +4,9 @@
 #ifndef DOSBOX_BIOS_H
 #define DOSBOX_BIOS_H
 
-#include "dosbox.h"
-
 #include <optional>
+#include <cstdint>
+#include "machine_type.h"
 
 #define BIOS_BASE_ADDRESS_COM1          0x400
 #define BIOS_BASE_ADDRESS_COM2          0x402

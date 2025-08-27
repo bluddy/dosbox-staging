@@ -4,7 +4,7 @@
 #ifndef DOSBOX_ETHERNET_SLIRP_H
 #define DOSBOX_ETHERNET_SLIRP_H
 
-#include "dosbox.h"
+
 
 #include <map>
 #include <deque>

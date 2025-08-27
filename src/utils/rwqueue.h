@@ -4,7 +4,7 @@
 #ifndef DOSBOX_RWQUEUE_H
 #define DOSBOX_RWQUEUE_H
 
-#include "dosbox.h"
+
 
 /*  RW (Read/Write) Queue
  *  ---------------------

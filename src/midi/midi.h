@@ -5,7 +5,7 @@
 #ifndef DOSBOX_MIDI_H
 #define DOSBOX_MIDI_H
 
-#include "dosbox.h"
+
 
 #include <array>
 #include <cassert>

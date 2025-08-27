@@ -5,7 +5,7 @@
 #ifndef DOSBOX_SHELL_H
 #define DOSBOX_SHELL_H
 
-#include "dosbox.h"
+
 
 #include <memory>
 #include <optional>

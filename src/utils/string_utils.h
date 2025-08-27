@@ -4,7 +4,7 @@
 #ifndef DOSBOX_STRING_UTILS_H
 #define DOSBOX_STRING_UTILS_H
 
-#include "dosbox.h"
+
 
 #include <cassert>
 #include <climits>
@@ -13,6 +13,8 @@
 #include <optional>
 #include <string>
 #include <vector>
+
+#include "misc/compiler.h"
 
 template <size_t N>
 int safe_sprintf(char (&dst)[N], const char* fmt, ...)
