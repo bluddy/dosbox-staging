@@ -5,7 +5,7 @@
 #ifndef DOSBOX_PCI_H
 #define DOSBOX_PCI_H
 
-#include "dosbox.h"
+#include "misc/types.h"
 
 #include "hardware/memory.h"
 

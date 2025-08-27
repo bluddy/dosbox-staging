@@ -3,14 +3,17 @@
 
 #include "mpu401.h"
 
+#include <cassert>
 #include <cstring>
 
 #include "config/setup.h"
 #include "cpu/cpu.h"
-#include "dosbox.h"
+#include "dosbox_app.h"
 #include "hardware/pic.h"
 #include "hardware/port.h"
 #include "midi/midi.h"
+#include "misc/logging.h"
+#include "utils/checks.h"
 #include "utils/math_utils.h"
 
 static void MPU401_Event(uint32_t);

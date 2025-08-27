@@ -7,6 +7,7 @@
 #if C_IPX
 
 #include <SDL_net.h>
+#include "misc/types.h"
 
 struct packetBuffer {
 	uint8_t buffer[1024];

@@ -7,6 +7,7 @@
 
 #include "config/setup.h"
 #include "cpu/registers.h"
+#include "dosbox_config.h"
 #include "hardware/input/mouse.h"
 #include "hardware/port.h"
 #include "misc/logging.h"

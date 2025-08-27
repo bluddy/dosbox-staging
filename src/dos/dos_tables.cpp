@@ -3,10 +3,12 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 
-#include "dosbox.h"
-#include "hardware/memory.h"
-#include "dos_inc.h"
+#include "dos/dos_inc.h"
 #include "cpu/callback.h"
+#include "dosbox_app.h"
+#include "hardware/memory.h"
+#include "misc/compiler.h"
+#include "misc/types.h"
 
 #ifdef _MSC_VER
 #pragma pack(1)

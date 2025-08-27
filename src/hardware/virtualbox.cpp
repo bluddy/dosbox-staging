@@ -7,11 +7,14 @@
 #include <set>
 
 #include "config/setup.h"
-#include "dosbox.h"
 #include "hardware/input/mouse.h"
 #include "hardware/pci_bus.h"
 #include "hardware/port.h"
+#include "hardware/memory.h"
+#include "misc/compiler.h"
+#include "misc/logging.h"
 #include "misc/support.h"
+#include "misc/types.h"
 #include "utils/checks.h"
 
 CHECK_NARROWING();

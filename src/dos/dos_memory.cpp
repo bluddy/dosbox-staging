@@ -1,15 +1,18 @@
 // SPDX-FileCopyrightText:  2002-2021 The DOSBox Team
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "dosbox.h"
+#include <cassert>
+#include <string_view>
 
 #include "config/config.h"
-#include "dos_inc.h"
+#include "dos/dos_inc.h"
 #include "dos/dos_memory.h"
+#include "dosbox_app.h"
 #include "hardware/memory.h"
+#include "machine_type.h"
+#include "misc/logging.h"
 #include "misc/support.h"
-
-#include <string_view>
+#include "utils/math_utils.h"
 
 enum class McbFaultStrategy { Deny, Repair, Report, Allow };
 

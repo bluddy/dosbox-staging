@@ -5,16 +5,20 @@
 #include "pci_bus.h"
 
 #include <array>
+#include <cassert>
 #include <memory>
 
+#include "config/setup.h"
 #include "cpu/callback.h"
+#include "cpu/registers.h"
 #include "debugger/debugger.h"
-#include "dosbox.h"
+#include "dosbox_app.h"
 #include "hardware/memory.h"
 #include "hardware/port.h"
-#include "cpu/registers.h"
-#include "config/setup.h"
+#include "misc/logging.h"
 #include "misc/support.h"
+#include "misc/types.h"
+#include "utils/checks.h"
 
 static uint32_t pci_caddress=0;			// current PCI addressing
 static Bitu pci_devices_installed=0;	// number of registered PCI devices
