@@ -6,7 +6,6 @@
 
 #include <cstring>
 
-#include "dosbox.h"
 #include "cpu/callback.h"
 #include "cpu/registers.h"
 #include "hardware/memory.h"

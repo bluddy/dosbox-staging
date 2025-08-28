@@ -2,7 +2,9 @@
 // SPDX-FileCopyrightText:  2002-2021 The DOSBox Team
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "dosbox.h"
+#include "misc/logging.h"
+#include "misc/support.h"
+#include "misc/types.h"
 
 #include <cstdlib>
 

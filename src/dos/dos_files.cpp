@@ -11,7 +11,6 @@
 #include <cstring>
 #include <ctime>
 
-#include "dosbox.h"
 #include "ints/bios.h"
 #include "hardware/memory.h"
 #include "cpu/registers.h"

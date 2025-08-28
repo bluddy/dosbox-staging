@@ -5,7 +5,11 @@
 #include "private/intel8042.h"
 
 #include "config/config.h"
-#include "dosbox.h"
+#include "dosbox_app.h"
+#include "identity.h"
+#include "machine_type.h"
+#include "misc/logging.h"
+#include "hardware/serialport/serialmouse.h"
 #include "dosbox_config.h"
 #include "hardware/memory.h"
 #include "hardware/pic.h"

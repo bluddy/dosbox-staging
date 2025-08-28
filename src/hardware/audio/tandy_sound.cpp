@@ -31,7 +31,8 @@
 
 #include "audio/channel_names.h"
 #include "config/setup.h"
-#include "dosbox.h"
+#include "machine_type.h"
+#include "misc/logging.h"
 #include "hardware/dma.h"
 #include "hardware/hardware.h"
 #include "hardware/mame/emu.h"

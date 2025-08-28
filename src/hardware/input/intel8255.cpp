@@ -5,7 +5,9 @@
 #include "private/intel8255.h"
 
 #include "audio/mixer.h"
-#include "dosbox.h"
+#include "machine_type.h"
+#include "misc/logging.h"
+#include "misc/support.h"
 #include "hardware/port.h"
 #include "hardware/timer.h"
 #include "utils/bitops.h"

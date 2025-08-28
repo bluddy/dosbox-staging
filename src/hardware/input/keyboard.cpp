@@ -11,7 +11,8 @@
 
 #include "config/config.h"
 #include "cpu/cpu.h"
-#include "dosbox.h"
+#include "dosbox_app.h"
+#include "misc/logging.h"
 #include "hardware/pic.h"
 #include "hardware/timer.h"
 #include "misc/support.h"

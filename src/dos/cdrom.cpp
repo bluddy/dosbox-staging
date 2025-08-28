@@ -9,8 +9,10 @@
 
 #include "audio/channel_names.h"
 #include "cpu/callback.h"
-#include "dosbox.h"
 #include "hardware/pic.h"
+#include "misc/logging.h"
+#include "audio/mixer.h"
+#include "misc/support.h"
 #include "utils/string_utils.h"
 
 namespace CDROM {

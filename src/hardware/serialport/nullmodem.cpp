@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 
-#include "dosbox.h"
+#include "misc/logging.h"
+#include "misc/support.h"
+#include "utils/string_utils.h"
 
 #if C_MODEM
 

@@ -55,7 +55,8 @@
   TODO: Import and adapt Aaron's latest MAME Voodoo sources.
 */
 
-#include "dosbox.h"
+#include "dosbox_app.h"
+#include "misc/logging.h"
 
 #include <algorithm>
 #include <array>
