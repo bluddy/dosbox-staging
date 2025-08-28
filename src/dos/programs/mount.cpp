@@ -5,7 +5,9 @@
 #include "mount_common.h"
 #include "mount.h"
 
-#include "dosbox.h"
+#include "misc/logging.h"
+#include "misc/messages.h"
+#include "misc/support.h"
 
 #include "ints/bios_disk.h"
 #include "config/config.h"

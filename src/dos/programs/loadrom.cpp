@@ -4,7 +4,10 @@
 
 #include "loadrom.h"
 
-#include "dosbox.h"
+#include "dos/dos_system.h"
+#include "machine_type.h"
+#include "misc/logging.h"
+#include "misc/messages.h"
 
 #include <cstdio>
 

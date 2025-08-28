@@ -4,7 +4,7 @@
 #ifndef DOSBOX_JOYSTICK_H
 #define DOSBOX_JOYSTICK_H
 
-#include "dosbox.h"
+#include <cstdint>
 
 void JOYSTICK_Enable(uint8_t which, bool enabled);
 

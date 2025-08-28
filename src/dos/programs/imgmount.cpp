@@ -4,7 +4,11 @@
 
 #include "imgmount.h"
 
-#include "dosbox.h"
+#include "dos/dos_system.h"
+#include "misc/logging.h"
+#include "misc/messages.h"
+#include "misc/support.h"
+#include "misc/types.h"
 
 #include <vector>
 

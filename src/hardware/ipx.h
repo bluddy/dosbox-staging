@@ -17,12 +17,11 @@
 #endif
 #endif
 
-#ifndef DOSBOX_DOSBOX_H
-#include "dosbox.h"
-#endif
 #ifndef DOSBOX_MEM_H
 #include "hardware/memory.h"
 #endif
+
+#include "misc/types.h"
 
 // In Use Flag codes
 #define USEFLAG_AVAILABLE  0x00

@@ -5,11 +5,10 @@
 #ifndef DOSBOX_MEMORY_H
 #define DOSBOX_MEMORY_H
 
-#include "dosbox.h"
-
 #include "utils/mem_host.h"
 #include "utils/mem_unaligned.h"
 #include "misc/types.h"
+#include <string>
 
 constexpr uint16_t MemPageSize     = 4096;
 constexpr uint8_t  RealSegmentSize = 16;

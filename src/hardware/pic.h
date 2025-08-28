@@ -4,8 +4,6 @@
 #ifndef DOSBOX_PIC_H
 #define DOSBOX_PIC_H
 
-#include "dosbox.h"
-
 #include <atomic>
 #include <cassert>
 #include <cmath>

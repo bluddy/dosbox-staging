@@ -3,7 +3,8 @@
 
 #include "loadfix.h"
 
-#include "dosbox.h"
+#include "dos/dos_system.h"
+#include "misc/messages.h"
 #include "more_output.h"
 #include "shell/shell.h"
 #include "utils/string_utils.h"

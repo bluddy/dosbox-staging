@@ -14,9 +14,8 @@
 #ifndef DOSBOX_NE2000_H
 #define DOSBOX_NE2000_H
 
-#include "dosbox.h"
-
 #include "hardware/port.h"
+#include "config/setup.h"
 
 #define bx_bool int
 #define bx_param_c uint8_t

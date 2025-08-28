@@ -11,7 +11,7 @@
 #include <string>
 #include <sstream>
 
-#include "dosbox.h"
+#include "misc/messages.h"
 #include "gui/mapper.h"
 #include "utils/math_utils.h"
 #include "more_output.h"
