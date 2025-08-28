@@ -12,7 +12,7 @@
 #include "audio/channel_names.h"
 #include "config/config.h"
 #include "config/setup.h"
-#include "dosbox.h"
+#include "misc/logging.h"
 #include "hardware/dma.h"
 #include "hardware/mame/emu.h"
 #include "hardware/mame/sn76496.h"

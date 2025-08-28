@@ -4,7 +4,7 @@
 // NOTE: a lot of this code assumes that the callback is called every emulated
 // millisecond
 
-#include "dosbox.h"
+#include "misc/logging.h"
 
 #include "private/covox.h"
 #include "private/disney.h"

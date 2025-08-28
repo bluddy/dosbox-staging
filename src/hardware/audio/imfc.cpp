@@ -38,7 +38,10 @@
 //    there is a way to upload Z80 programs to the IMFC card and execute it! Who
 //    knew that IBM added this back-door :)
 
-#include "dosbox.h"
+#include "identity.h"
+#include "machine_type.h"
+#include "misc/logging.h"
+#include "misc/support.h"
 
 #include <array>
 #include <chrono>
