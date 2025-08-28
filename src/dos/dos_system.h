@@ -5,8 +5,6 @@
 #ifndef DOSBOX_DOS_SYSTEM_H
 #define DOSBOX_DOS_SYSTEM_H
 
-#include "dosbox.h"
-
 #include <string>
 #include <vector>
 
@@ -15,6 +13,7 @@
 #include "utils/fs_utils.h"
 #include "hardware/memory.h"
 #include "misc/support.h"
+#include "misc/messages.h"
 
 #define DOS_NAMELENGTH 12
 #define DOS_NAMELENGTH_ASCII (DOS_NAMELENGTH+1)

@@ -5,8 +5,6 @@
 #ifndef DOSBOX_CDROM_H
 #define DOSBOX_CDROM_H
 
-#include "dosbox.h"
-
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -18,6 +16,7 @@
 
 #include "audio/mixer.h"
 #include "hardware/memory.h"
+#include "misc/logging.h"
 #include "misc/support.h"
 #include "utils/rwqueue.h"
 

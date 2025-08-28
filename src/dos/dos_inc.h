@@ -5,8 +5,6 @@
 #ifndef DOSBOX_DOS_INC_H
 #define DOSBOX_DOS_INC_H
 
-#include "dosbox.h"
-
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -16,6 +14,7 @@
 
 #include "dos/dos_system.h"
 #include "hardware/memory.h"
+#include "config/setup.h"
 
 #define EXT_DEVICE_BIT 0x0200
 

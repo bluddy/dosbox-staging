@@ -4,7 +4,8 @@
 #ifndef DOSBOX_DOS_KEYBOARD_LAYOUT_H
 #define DOSBOX_DOS_KEYBOARD_LAYOUT_H
 
-#include "dosbox.h"
+#include <string>
+#include <cstdint>
 
 enum class KeyboardLayoutResult {
 	OK,

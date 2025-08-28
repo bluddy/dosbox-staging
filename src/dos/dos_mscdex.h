@@ -4,7 +4,6 @@
 #ifndef DOSBOX_DOS_MSCDEX_H
 #define DOSBOX_DOS_MSCDEX_H
 
-#include "dosbox.h"
 #include "cdrom.h"
 
 int   MSCDEX_AddDrive(char driveLetter, const char *physicalPath, uint8_t &subUnit);

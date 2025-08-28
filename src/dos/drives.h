@@ -4,8 +4,6 @@
 #ifndef DOSBOX_DRIVES_H
 #define DOSBOX_DRIVES_H
 
-#include "dosbox.h"
-
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -14,6 +12,13 @@
 
 #include "dos/dos_inc.h"
 #include "dos/dos_system.h"
+#include "misc/messages.h"
+#include "misc/logging.h"
+#include "misc/support.h"
+#include "misc/types.h"
+#include "ints/bios.h"
+#include "misc/cross.h"
+#include "utils/fs_utils.h"
 
 // GCC throws a warning about non-virtual destructor for std::enable_shared_from_this
 // This is normally a helpful warning. Ex: If DOS_Drive had a non-virtual destructor, it would be a problem.

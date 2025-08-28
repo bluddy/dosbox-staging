@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "dos_keyboard_layout.h"
+#include <string>
+#include <cstdint>
 
 #ifndef DOSBOX_SCREEN_FONTS_H
 #define DOSBOX_SCREEN_FONTS_H
