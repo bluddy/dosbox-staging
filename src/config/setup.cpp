@@ -15,6 +15,7 @@
 #include <string_view>
 #include <unordered_map>
 
+#include "dosbox_app.h"
 #include "config/config.h"
 #include "misc/ansi_code_markup.h"
 #include "misc/console.h"
