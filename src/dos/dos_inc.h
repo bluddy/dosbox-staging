@@ -12,6 +12,7 @@
 #include <string>
 #include <type_traits>
 
+#include "../src/constants.h"
 #include "dos/dos_system.h"
 #include "hardware/memory.h"
 #include "config/setup.h"

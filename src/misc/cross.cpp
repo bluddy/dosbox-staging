@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "misc/cross.h"
+#include "identity.h"
 #include "dosbox_config.h"
 
 #include <cerrno>
